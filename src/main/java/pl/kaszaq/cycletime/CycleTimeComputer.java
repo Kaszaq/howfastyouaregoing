@@ -2,7 +2,6 @@ package pl.kaszaq.cycletime;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.LongSummaryStatistics;
@@ -10,7 +9,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-import pl.kaszaq.agile.AgileClient;
 import pl.kaszaq.agile.AgileProject;
 import pl.kaszaq.agile.Issue;
 import pl.kaszaq.agile.IssuePredicates;
@@ -26,25 +24,26 @@ import pl.kaszaq.agile.IssueWrapper;
 public class CycleTimeComputer {
 
     private final AgileProject agileProject;
-    private final String finalStatus;// = "Closed";
+    private final String finalStatus;
 
     public double calulcateCycleTimeOfClosedIssues(Predicate<Issue> filters, LocalDate toDate, LocalDate fromDate,
             String... statuses) {
         LongSummaryStatistics cycleTimeStatistics = agileProject.getAllIssues()
                 .stream()
                 .filter(filters.and(IssuePredicates.hasStatusTransitionsThat(IssueStatusTransitionPredicates.createdAfter(fromDate),
-                        IssueStatusTransitionPredicates.createdAfter(toDate),
+                        IssueStatusTransitionPredicates.createdBefore(toDate),
                         IssueStatusTransitionPredicates.to(finalStatus)
                 )))
                 //.peek(i -> System.out.println(i.getPrettyName()))
                 .mapToLong(i -> new IssueWrapper(i).getDurationInStatuses(statuses).getSeconds())
-                //                .peek(n -> System.out.println(NumberUtils.prettyPrint((double) n / 3600.0)))
+                //.peek(n -> System.out.println(NumberUtils.prettyPrint((double) n / 3600.0)))
                 .summaryStatistics();
         return cycleTimeStatistics.getAverage() / 3600;
     }
 
     public double calulcateCycleTimeOfStories(Predicate<Issue> filters, LocalDate toDate, LocalDate fromDate,
             String... statuses) {
+        // TODO: this does not work as expected
         List<Duration> durations = new ArrayList<>();
         for (Issue issue : agileProject.getAllIssues()) {
             if (IssuePredicates.hasSubtasks().test(issue)) {
