@@ -36,6 +36,10 @@ public class IssuePredicates {
     public static Predicate<Issue> hasSubtasks() {
         return issue -> !issue.getSubtaskKeys().isEmpty();
     }
+    
+    public static Predicate<Issue> isSubtask() {
+        return issue -> issue.isSubtask();
+    }
 
     public static Predicate<Issue> isEpic() {
         return issue -> issue.getType().equals("Epic");
