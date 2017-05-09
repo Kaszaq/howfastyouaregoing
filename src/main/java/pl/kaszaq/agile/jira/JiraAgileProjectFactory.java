@@ -111,11 +111,11 @@ public class JiraAgileProjectFactory {
 
             ZonedDateTime lastUpdatedIssue = projectData.getLastUpdatedIssue();
             ZonedDateTime lastUpdated = projectData.getLastUpdated();
-            Map<String, Issue> issues = new HashMap<>(projectData.getIssues());
+            Map<String, IssueData> issues = new HashMap<>(projectData.getIssues());
             Iterator<JsonNode> issuesIterator = tree.get("issues").elements();
             while (issuesIterator.hasNext()) {
                 JsonNode node = issuesIterator.next();
-                Issue issueData = issueParser.parseJiraIssue(node);
+                IssueData issueData = issueParser.parseJiraIssue(node);
                 if (issueData.getUpdated().isAfter(lastUpdatedIssue)) {
                     lastUpdatedIssue = issueData.getUpdated();
                 }
