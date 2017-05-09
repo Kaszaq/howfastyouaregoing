@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import pl.kaszaq.agile.AgileProject;
-import pl.kaszaq.agile.Issue;
+import pl.kaszaq.agile.IssueData;
 import pl.kaszaq.agile.IssuePredicates;
 import pl.kaszaq.agile.IssueStatusTransition;
 import pl.kaszaq.agile.IssueStatusTransitionPredicates;
@@ -26,7 +26,7 @@ public class CycleTimeComputer {
     private final AgileProject agileProject;
     private final String finalStatus;
 
-    public double calulcateCycleTimeOfClosedIssues(Predicate<Issue> filters, LocalDate toDate, LocalDate fromDate,
+    public double calulcateCycleTimeOfClosedIssues(Predicate<IssueData> filters, LocalDate toDate, LocalDate fromDate,
             String... statuses) {
         LongSummaryStatistics cycleTimeStatistics = agileProject.getAllIssues()
                 .stream()
@@ -41,13 +41,13 @@ public class CycleTimeComputer {
         return cycleTimeStatistics.getAverage() / 3600;
     }
 
-    public double calulcateCycleTimeOfStories(Predicate<Issue> filters, LocalDate toDate, LocalDate fromDate,
+    public double calulcateCycleTimeOfStories(Predicate<IssueData> filters, LocalDate toDate, LocalDate fromDate,
             String... statuses) {
         // TODO: this does not work as expected
         List<Duration> durations = new ArrayList<>();
-        for (Issue issue : agileProject.getAllIssues()) {
+        for (IssueData issue : agileProject.getAllIssues()) {
             if (IssuePredicates.hasSubtasks().test(issue)) {
-                Set<Issue> subtasks = getSubtasks(issue);
+                Set<IssueData> subtasks = getSubtasks(issue);
                 if (allSubtasksClosed(subtasks)) {
                     List<IssueStatusTransition> transitions = subtasks.stream()
                             .flatMap(i -> i.getIssueStatusTransitions().stream())
@@ -70,11 +70,11 @@ public class CycleTimeComputer {
         return cycleTimeStatistics.getAverage() / 3600;
     }
 
-    private boolean allSubtasksClosed(Set<Issue> subtasks) {
+    private boolean allSubtasksClosed(Set<IssueData> subtasks) {
         return !subtasks.stream().anyMatch(s -> !s.getStatus().equals(finalStatus));
     }
 
-    private Set<Issue> getSubtasks(Issue i) {
+    private Set<IssueData> getSubtasks(IssueData i) {
         //TODO this could be moved to some helper method...
         return i.getSubtaskKeys().stream().map(id -> agileProject.getIssue(id)).collect(Collectors.toSet());
     }

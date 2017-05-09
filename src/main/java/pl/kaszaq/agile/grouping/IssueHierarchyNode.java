@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 import lombok.Getter;
-import pl.kaszaq.agile.Issue;
+import pl.kaszaq.agile.IssueData;
 
 /**
  *
@@ -14,9 +14,9 @@ import pl.kaszaq.agile.Issue;
 public class IssueHierarchyNode {
 
     private final Set<IssueHierarchyNode> childNodes = new HashSet<>();
-    private final Issue issue;
+    private final IssueData issue;
 
-    IssueHierarchyNode(Issue issue) {
+    IssueHierarchyNode(IssueData issue) {
         this.issue = issue;
     }
 
@@ -38,7 +38,7 @@ public class IssueHierarchyNode {
         }
     }
 
-    boolean hasChild(Issue issue) {
+    boolean hasChild(IssueData issue) {
         if (childNodes.stream().filter(cn -> cn.getIssue().equals(issue)).findFirst().isPresent()){
             return true;
         } else {
@@ -47,8 +47,8 @@ public class IssueHierarchyNode {
         
     }
 
-    public Set<Issue> getLeafsIssues() {
-        Set<Issue> leafIssues = new HashSet<>();
+    public Set<IssueData> getLeafsIssues() {
+        Set<IssueData> leafIssues = new HashSet<>();
         if (childNodes.isEmpty()){
             leafIssues.add(issue);
         } else {

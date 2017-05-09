@@ -19,7 +19,7 @@ import pl.kaszaq.utils.DateUtils;
 public class IssueWrapper {
 
     @Getter
-    private final Issue issue;
+    private final IssueData issue;
 
     @Getter(lazy = true)
     private final Map<String, Duration> timeInStatus = calculateTimeInStatus();
@@ -35,12 +35,7 @@ public class IssueWrapper {
     }
 
     public boolean isStatusOnDay(LocalDate date, Set<String> statuses) {
-        for (String status : statuses) {
-            if (getDatesInStatus(status).contains(date)) {
-                return true;
-            }
-        }
-        return false;
+        return statuses.stream().anyMatch((status) -> (getDatesInStatus(status).contains(date)));
     }
 
     private SortedSet<LocalDate> getDatesInStatus(String status) {
@@ -86,20 +81,21 @@ public class IssueWrapper {
         return blockedDays;
     }
 
-    private Duration calculateWorkTimeInStatus(Issue issue, String status) {
+    private Duration calculateWorkTimeInStatus(IssueData issue, String status) {
         return calculateTimeInStatus(issue, status, IssueWrapper::calculateDurationBetweenInWorkingHours);
     }
 
-    private Duration calculateTotalTimeInStatus(Issue issue, String status) {
+    private Duration calculateTotalTimeInStatus(IssueData issue, String status) {
         return calculateTimeInStatus(issue, status, (from, to) -> Duration.between(from, to));
     }
 
-    private Duration calculateTimeInStatus(Issue issue, String status, BiFunction<ZonedDateTime, ZonedDateTime, Duration> durationFunction) {
+    private Duration calculateTimeInStatus(IssueData issue, String status, BiFunction<ZonedDateTime, ZonedDateTime, Duration> durationFunction) {
         ZonedDateTime temp = null;
         Duration duration = Duration.ZERO;
         for (IssueStatusTransition issueStatusTransition : issue.getIssueStatusTransitions()) {
             if (temp != null) {
                 if (issueStatusTransition.getDate() == null) {
+                    //TODO: what is that?...
                     System.out.println("aaaa");
                 }
                 duration = duration.plus(durationFunction.apply(temp, issueStatusTransition.getDate()));

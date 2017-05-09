@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import lombok.extern.slf4j.Slf4j;
-import pl.kaszaq.agile.Issue;
+import pl.kaszaq.agile.IssueData;
 import pl.kaszaq.agile.IssueBlockedTransition;
 import pl.kaszaq.agile.IssueStatusTransition;
 import pl.kaszaq.json.JsonNodeOptional;
@@ -19,12 +19,12 @@ import static pl.kaszaq.utils.DateUtils.parseDate;
 @Slf4j
 public class JiraIssueParser {
 
-    Issue parseJiraIssue(String jsonIssue) throws IOException {
+    IssueData parseJiraIssue(String jsonIssue) throws IOException {
         JsonNode node = OBJECT_MAPPER.readTree(jsonIssue);
         return parseJiraIssue(node);
     }
 
-    Issue parseJiraIssue(JsonNode node) {
+    IssueData parseJiraIssue(JsonNode node) {
         JsonNodeOptional issueNode = JsonNodeOptional.of(node);
 
         String key = issueNode.get("key").asText();
@@ -55,7 +55,7 @@ public class JiraIssueParser {
         fieldsNode.get("components").elements().forEachRemaining(componentNode -> components.add(componentNode.get("name").asText()));
         // TODO: this filed should not be a part of issue but rather additional, in some custom fields map.
         String timesheetsCode = fieldsNode.get("customfield_12450").asText();
-        Issue issue = Issue.builder()
+        IssueData issue = IssueData.builder()
                 .created(created)
                 .creator(creator)
                 .summary(summary)

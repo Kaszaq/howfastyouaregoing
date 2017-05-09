@@ -14,10 +14,10 @@ import pl.kaszaq.utils.CommonPredicates;
 public class AgileProjectConfiguration {
 
     private final String[] wipStatuses;
-    private final Predicate<Issue> defaultFilter;
+    private final Predicate<IssueData> defaultFilter;
     private final IssueStatusMapping issueStatusMapping;
 
-    private AgileProjectConfiguration(final String[] wipStatuses, final Predicate<Issue> defaultFilter, final IssueStatusMapping issueStatusMapping) {
+    private AgileProjectConfiguration(final String[] wipStatuses, final Predicate<IssueData> defaultFilter, final IssueStatusMapping issueStatusMapping) {
 
         this.wipStatuses = wipStatuses;
 
@@ -32,7 +32,7 @@ public class AgileProjectConfiguration {
     public static class AgileProjectConfigurationBuilder {
 
         private String[] wipStatuses = new String[0];
-        private Predicate<Issue> defaultFilter = CommonPredicates.alwaysTrue();
+        private Predicate<IssueData> defaultFilter = CommonPredicates.alwaysTrue();
         private Map<String, String> statusMapping = new HashMap<>();
 
         private AgileProjectConfigurationBuilder() {
@@ -45,7 +45,7 @@ public class AgileProjectConfiguration {
             return this;
         }
 
-        public AgileProjectConfigurationBuilder defaultFilter(Predicate<Issue> defaultFilter) {
+        public AgileProjectConfigurationBuilder defaultFilter(Predicate<IssueData> defaultFilter) {
             this.defaultFilter = defaultFilter;
             return this;
         }

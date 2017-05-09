@@ -12,7 +12,7 @@ import lombok.ToString;
 @Builder
 @Getter
 @ToString
-public class Issue {
+public class IssueData {
     private final String key;
     private final String creator;
     private final String type;
@@ -55,7 +55,7 @@ public class Issue {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Issue other = (Issue) obj;
+        final IssueData other = (IssueData) obj;
         if (!Objects.equals(this.key, other.key)) {
             return false;
         }
