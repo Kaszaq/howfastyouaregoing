@@ -22,11 +22,11 @@ import pl.kaszaq.agile.IssueWrapper;
  */
 @AllArgsConstructor
 public class CycleTimeComputer {
-
+// TODO: add tests
     private final AgileProject agileProject;
     private final String finalStatus;
 
-    public double calulcateCycleTimeOfClosedIssues(Predicate<IssueData> filters, LocalDate toDate, LocalDate fromDate,
+    public double calulcateCycleTimeOfAllIssues(Predicate<IssueData> filters, LocalDate toDate, LocalDate fromDate,
             String... statuses) {
         LongSummaryStatistics cycleTimeStatistics = agileProject.getAllIssues()
                 .stream()
@@ -43,12 +43,15 @@ public class CycleTimeComputer {
 
     public double calulcateCycleTimeOfStories(Predicate<IssueData> filters, LocalDate toDate, LocalDate fromDate,
             String... statuses) {
-        // TODO: this does not work as expected
+        //TODO: this ignores fromDate and toDate
         List<Duration> durations = new ArrayList<>();
         for (IssueData issue : agileProject.getAllIssues()) {
-            if (IssuePredicates.hasSubtasks().test(issue)) {
+            if (IssuePredicates.hasSubtasks().and(IssuePredicates.hasStatusTransitionsThat(IssueStatusTransitionPredicates.createdAfter(fromDate),
+                        IssueStatusTransitionPredicates.createdBefore(toDate),
+                        IssueStatusTransitionPredicates.to(finalStatus)
+                )).test(issue)) {
                 Set<IssueData> subtasks = getSubtasks(issue);
-                if (allSubtasksClosed(subtasks)) {
+                if (allSubtasksInFinalStatus(subtasks)) {
                     List<IssueStatusTransition> transitions = subtasks.stream()
                             .flatMap(i -> i.getIssueStatusTransitions().stream())
                             .filter(IssueStatusTransitionPredicates.to(statuses))
@@ -70,7 +73,7 @@ public class CycleTimeComputer {
         return cycleTimeStatistics.getAverage() / 3600;
     }
 
-    private boolean allSubtasksClosed(Set<IssueData> subtasks) {
+    private boolean allSubtasksInFinalStatus(Set<IssueData> subtasks) {
         return !subtasks.stream().anyMatch(s -> !s.getStatus().equals(finalStatus));
     }
 

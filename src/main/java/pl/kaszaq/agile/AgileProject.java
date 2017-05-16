@@ -11,7 +11,7 @@ public class AgileProject {
     private final String id;
 
     AgileProject(String id, Map<String, IssueData> data) {
-        this.id=id;
+        this.id = id;
         this.data = new HashMap<>(data);
     }
 
@@ -55,6 +55,5 @@ public class AgileProject {
         }
         return true;
     }
-    
 
 }
