@@ -27,10 +27,10 @@ public class JiraAgileProjectFactory {
     private static final ZonedDateTime INITIAL_DATE = ZonedDateTime.of(1970, Month.JANUARY.getValue(), 1, 0, 0, 0, 0, ZoneId.systemDefault());
     public static final int MINUTES_UNTIL_UPDATE_REQUESTED = 15;
     private final JiraIssueParser issueParser = new JiraIssueParser();
-    private final HttpClient httpClient = new HttpClient(Config.getInstance().getJiraJsessionId());
+    private final HttpClient httpClient;
 
-    public JiraAgileProjectFactory() {
-
+    public JiraAgileProjectFactory(String jsessionId) {
+        httpClient  = new HttpClient(jsessionId);
         //TODO: this should not be inside constructor
         JIRA_CACHE_DIRECTORY.mkdirs();
         JIRA_CACHE_ISSUES_DIRECTORY.mkdirs();
