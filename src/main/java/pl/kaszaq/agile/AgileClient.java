@@ -12,12 +12,13 @@ public class AgileClient {
 
     private static final Pattern ISSUE_PATTERN = Pattern.compile("(\\w+)-\\d+.*");
     private final Map<String, Optional<AgileProject>> agileProjects = new HashMap<>();
-    private final AgileProjectFactoryProvider agileProjectFactoryProvider = new AgileProjectFactoryProvider();
+    private final AgileProjectFactoryProvider agileProjectFactoryProvider;
     private final Map<String, AgileProjectConfiguration> projectsConfiguration;
     private final AgileProjectConfiguration DEFAULT_PROJECT_CONFIGURATION = AgileProjectConfiguration.builder().build();
 
-    AgileClient(Map<String, AgileProjectConfiguration> projectsConfiguration) {
+    AgileClient(Map<String, AgileProjectConfiguration> projectsConfiguration, String jiraJsessionId) {
        this.projectsConfiguration = projectsConfiguration;
+       agileProjectFactoryProvider= new AgileProjectFactoryProvider(jiraJsessionId);
     }
 
 
