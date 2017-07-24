@@ -12,13 +12,15 @@ public class AgileClient {
 
     private static final Pattern ISSUE_PATTERN = Pattern.compile("(\\w+)-\\d+.*");
     private final Map<String, Optional<AgileProject>> agileProjects = new HashMap<>();
-    private final AgileProjectFactoryProvider agileProjectFactoryProvider;
+    private final AgileProjectProvider agileProjectProvider;
     private final Map<String, AgileProjectConfiguration> projectsConfiguration;
     private final AgileProjectConfiguration DEFAULT_PROJECT_CONFIGURATION = AgileProjectConfiguration.builder().build();
 
-    AgileClient(Map<String, AgileProjectConfiguration> projectsConfiguration, String jiraJsessionId) {
-       this.projectsConfiguration = projectsConfiguration;
-       agileProjectFactoryProvider= new AgileProjectFactoryProvider(jiraJsessionId);
+   
+
+    AgileClient(Map<String, AgileProjectConfiguration> configuration, AgileProjectProvider agileProjectProvider) {
+        this.projectsConfiguration = configuration;
+        this.agileProjectProvider=agileProjectProvider;
     }
 
 
@@ -37,7 +39,7 @@ public class AgileClient {
     }
 
     private Optional<AgileProject> getProject(String projectId) {
-        return agileProjects.computeIfAbsent(projectId, id -> agileProjectFactoryProvider.getJiraAgileProjectFactory().loadProject(id, getConfiguration(id)));
+        return agileProjects.computeIfAbsent(projectId, id -> agileProjectProvider.loadProject(id, getConfiguration(id)));
     }
 
     private AgileProjectConfiguration getConfiguration(String id) {

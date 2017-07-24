@@ -20,10 +20,6 @@ public class DateUtils {
         return createdDate;
     }
 
-    public static ZonedDateTime parseSimpleDate(String date) {
-        return ZonedDateTime.parse(date, SIMPLE_DATE_FORMATTER);
-    }
-
     public static String printDateTimeExcel(ZonedDateTime date) {
         return date.format(EXCEL_DATETIME_FORMATTER);
     }

@@ -1,5 +1,6 @@
 package pl.kaszaq.agile.jira;
 
+import pl.kaszaq.agile.AgileProjectProvider;
 import pl.kaszaq.agile.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableSet;
@@ -20,22 +21,24 @@ import pl.kaszaq.agile.pojo.AgileProjectData;
 import pl.kaszaq.http.HttpClient;
 
 @Slf4j
-public class JiraAgileProjectFactory {
+public class JiraAgileProjectProvider implements AgileProjectProvider {
 
-    private static final File JIRA_CACHE_DIRECTORY = new File("cache/jira/");
-    private static final File JIRA_CACHE_ISSUES_DIRECTORY = new File("cache/jira/issues/");
     private static final ZonedDateTime INITIAL_DATE = ZonedDateTime.of(1970, Month.JANUARY.getValue(), 1, 0, 0, 0, 0, ZoneId.systemDefault());
     public static final int MINUTES_UNTIL_UPDATE_REQUESTED = 15;
     private final JiraIssueParser issueParser = new JiraIssueParser();
     private final HttpClient httpClient;
+    private final File jiraCacheDirectory;
+    private final File jiraCacheIssuesDirectory;
+    private final String jiraSearchEndpoint;
 
-    public JiraAgileProjectFactory(String jsessionId) {
-        httpClient  = new HttpClient(jsessionId);
-        //TODO: this should not be inside constructor
-        JIRA_CACHE_DIRECTORY.mkdirs();
-        JIRA_CACHE_ISSUES_DIRECTORY.mkdirs();
+    JiraAgileProjectProvider(HttpClient client, File jiraCacheDirectory, File jiraCacheIssuesDirectory, String jiraSearchEndpoint) {
+        this.jiraCacheDirectory = jiraCacheDirectory;
+        this.jiraCacheIssuesDirectory = jiraCacheIssuesDirectory;
+        this.jiraSearchEndpoint = jiraSearchEndpoint;
+        this.httpClient = client;
     }
 
+    @Override
     public Optional<AgileProject> loadProject(String projectId, AgileProjectConfiguration configuration) {
         try {
             Optional<AgileProjectData> projectDataOptional = loadProjectFromFile(projectId);
@@ -71,12 +74,11 @@ public class JiraAgileProjectFactory {
     }
 
     private File getProjectFile(String projectId) {
-
-        return new File(JIRA_CACHE_DIRECTORY, projectId + ".json");
+        return new File(jiraCacheDirectory, projectId + ".json");
     }
 
     private File getIssueFile(String issueId) {
-        return new File(JIRA_CACHE_ISSUES_DIRECTORY, issueId + ".json");
+        return new File(jiraCacheIssuesDirectory, issueId + ".json");
     }
 
     private void saveProjectToFile(AgileProjectData project) throws IOException {
@@ -101,9 +103,8 @@ public class JiraAgileProjectFactory {
                     .maxResults(maxResults)
                     .startAt(startAt)
                     .build();
-            String url = Config.getInstance().getJiraUrl()+"/rest/api/2/search";
 
-            String response = httpClient.postJson(url, searchRequest);
+            String response = httpClient.postJson(jiraSearchEndpoint, searchRequest);
             JsonNode tree = OBJECT_MAPPER.readTree(response);
             maxResults = tree.get("maxResults").asInt();
             startAt = tree.get("startAt").asInt();

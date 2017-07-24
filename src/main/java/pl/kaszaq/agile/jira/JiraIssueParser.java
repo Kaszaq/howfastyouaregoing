@@ -17,7 +17,7 @@ import pl.kaszaq.agile.IssueStatusMapping;
 import static pl.kaszaq.utils.DateUtils.parseDate;
 
 @Slf4j
-public class JiraIssueParser {
+class JiraIssueParser {
 
     IssueData parseJiraIssue(String jsonIssue) throws IOException {
         JsonNode node = OBJECT_MAPPER.readTree(jsonIssue);
