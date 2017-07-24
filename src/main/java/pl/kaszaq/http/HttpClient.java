@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.Base64;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -29,7 +30,13 @@ public class HttpClient {
                 .build();
     }
 
-    
+    public HttpClient(String username, String password) {
+        String encodedCredentials = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
+        httpClient = HttpClients.custom()
+                .setDefaultHeaders(Lists.newArrayList(
+                        new BasicHeader("Authorization", "Basic " + encodedCredentials)))
+                .build();
+    }
 
     public String get(String url) throws IOException {
         HttpGet httpGet = new HttpGet(url);
@@ -43,7 +50,7 @@ public class HttpClient {
             throws IOException, JsonProcessingException, UnsupportedCharsetException, ParseException {
         HttpPost post = new HttpPost(url);
         String entity = OBJECT_MAPPER.writeValueAsString(object);
-        
+
         LOG.info("Executing POST request {} with body {}", post.getRequestLine(), entity);
         StringEntity requestEntity = new StringEntity(
                 entity,

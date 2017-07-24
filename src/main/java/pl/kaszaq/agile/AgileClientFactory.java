@@ -26,7 +26,7 @@ public class AgileClientFactory {
     public static class AgileClientConstructor {
 
         Map<String, AgileProjectConfiguration> configuration = new HashMap<>();
-        String jiraJsessionID;
+        AgileProjectProvider agileProjectProvider;
 
         private AgileClientConstructor() {
         }
@@ -36,13 +36,13 @@ public class AgileClientFactory {
             return this;
         }
 
-        public AgileClientConstructor withJiraJsessionId(String jiraJsessionID) {
-            this.jiraJsessionID = jiraJsessionID;
+        public AgileClientConstructor withAgileProjectProvider(AgileProjectProvider agileProjectProvider) {
+            this.agileProjectProvider = agileProjectProvider;
             return this;
         }
 
         public AgileClient create() {
-            return new AgileClient(configuration, jiraJsessionID);
+            return new AgileClient(configuration, agileProjectProvider);
         }
     }
 

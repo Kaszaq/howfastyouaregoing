@@ -32,39 +32,24 @@ public class CfdData {
         return Collections.unmodifiableSortedMap(cfdItems);
     }
 
-    public void printoutForCfd(List<String> statusOrder) {
-        Map<String, Integer> statusValues = new HashMap<>();
-        statusOrder.forEach(status -> statusValues.put(status, 0));
-        statusOrder.stream().map(o -> "\t" + o).forEach(System.out::print);
-        System.out.println("");
-        getDailyTransitions().forEach((k, v) -> {
-            System.out.print(printSimpleDate(k) + "\t");
-            statusOrder.forEach(status -> {
-                Integer newValue = statusValues.merge(status, v.getValueChangeForStatus(status), Integer::sum);
-                System.out.print(newValue + "\t");
-            });
-            System.out.println("");
-        });
-    }
-
     public static class DailyStatusChanges {
 
-        private final Map<String, Integer> itemsInStatuses = new HashMap<>();
+        private final Map<String, Integer> statusChanges = new HashMap<>();
 
-        public Map<String, Integer> getItemsInStatuses() {
-            return itemsInStatuses;
+        public Map<String, Integer> getStatusChanges() {
+            return statusChanges;
         }
 
         private void transitionedToStatus(String toStatus) {
-            itemsInStatuses.merge(toStatus, 1, Integer::sum);
+            statusChanges.merge(toStatus, 1, Integer::sum);
         }
 
         private void transitionedFromStatus(String fromStatus) {
-            itemsInStatuses.merge(fromStatus, -1, Integer::sum);
+            statusChanges.merge(fromStatus, -1, Integer::sum);
         }
 
         public int getValueChangeForStatus(String status) {
-            return itemsInStatuses.getOrDefault(status, 0);
+            return statusChanges.getOrDefault(status, 0);
         }
     }
 }
