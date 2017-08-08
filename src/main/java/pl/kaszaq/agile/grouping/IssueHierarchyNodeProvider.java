@@ -82,9 +82,9 @@ public class IssueHierarchyNodeProvider {
     }
 
     private Optional<IssueData> checkEpic(IssueData issue, AgileProject agileProject) {
+        
         // TODO: Add support for linking through epics;
         return Optional.empty();
-
     }
 
     private Optional<Set<IssueData>> checkLinkedIssues(IssueData issue, AgileProject agileProject) {

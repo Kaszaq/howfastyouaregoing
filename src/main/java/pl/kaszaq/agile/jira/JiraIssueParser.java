@@ -55,6 +55,11 @@ class JiraIssueParser {
         fieldsNode.get("components").elements().forEachRemaining(componentNode -> components.add(componentNode.get("name").asText()));
         // TODO: this filed should not be a part of issue but rather additional, in some custom fields map.
         String timesheetsCode = fieldsNode.get("customfield_12450").asText();
+        if (timesheetsCode==null){
+            timesheetsCode = fieldsNode.get("customfield_15857").asText();
+        }
+        
+        
         IssueData issue = IssueData.builder()
                 .created(created)
                 .creator(creator)
