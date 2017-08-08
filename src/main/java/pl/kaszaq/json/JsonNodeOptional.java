@@ -33,11 +33,11 @@ public class JsonNodeOptional {
     }
 
     public String asText() {
-        return optionalNode.map(JsonNode::asText).orElse(null);
+        return optionalNode.filter(node -> !node.isNull()).map(JsonNode::asText).orElse(null);
     }
 
     public boolean asBoolean() {
-        return optionalNode.map(JsonNode::asBoolean).orElse(false);
+        return optionalNode.filter(node -> !node.isNull()).map(JsonNode::asBoolean).orElse(false);
     }
 
     public Iterator<JsonNodeOptional> elements() {
@@ -48,7 +48,7 @@ public class JsonNodeOptional {
     }
 
     public int asInt() {
-        return optionalNode.map(JsonNode::asInt).orElse(0);
+        return optionalNode.filter(node -> !node.isNull()).map(JsonNode::asInt).orElse(0);
     }
 
     public boolean has(String fieldName) {

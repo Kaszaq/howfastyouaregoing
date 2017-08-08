@@ -30,6 +30,7 @@ public class AgileProjectFactory {
                     .type(v.getType())
                     .labels(v.getLabels())
                     .components(v.getComponents())
+                    .timesheetsCode(v.getTimesheetsCode())
                     .build();
             transformedAgileProjectData.put(k, issue);
         }
