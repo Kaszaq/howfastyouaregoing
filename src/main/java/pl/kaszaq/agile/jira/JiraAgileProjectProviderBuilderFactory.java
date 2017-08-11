@@ -2,10 +2,14 @@ package pl.kaszaq.agile.jira;
 
 import pl.kaszaq.agile.AgileProjectProvider;
 import java.io.File;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Function;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import pl.kaszaq.agile.jira.JiraAgileProjectProvider;
 import pl.kaszaq.http.HttpClient;
+import pl.kaszaq.json.JsonNodeOptional;
 
 @Slf4j
 public class JiraAgileProjectProviderBuilderFactory {
@@ -25,6 +29,7 @@ public class JiraAgileProjectProviderBuilderFactory {
         private String password;
         private File cacheDir;
         private String jiraUrl;
+        private Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers = Collections.emptyMap();
 
         private JiraAgileProjectProviderBuilder(String username, String password) {
             this.username = username;
@@ -45,6 +50,11 @@ public class JiraAgileProjectProviderBuilderFactory {
 
         public JiraAgileProjectProviderBuilder withCacheDir(File cacheDir) {
             this.cacheDir = cacheDir;
+            return this;
+        }
+        public JiraAgileProjectProviderBuilder withCustomFieldsParsers(
+                Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers) {
+            this.customFieldsParsers = customFieldsParsers;
             return this;
         }
 
@@ -68,7 +78,7 @@ public class JiraAgileProjectProviderBuilderFactory {
             jiraCacheDirectory.mkdirs();
             jiraCacheIssuesDirectory.mkdirs();
             String jiraSearchUrl = jiraUrl + "/rest/api/2/search";
-            return new JiraAgileProjectProvider(client, jiraCacheDirectory, jiraCacheIssuesDirectory, jiraSearchUrl);
+            return new JiraAgileProjectProvider(client, jiraCacheDirectory, jiraCacheIssuesDirectory, jiraSearchUrl, customFieldsParsers);
         }
 
     }

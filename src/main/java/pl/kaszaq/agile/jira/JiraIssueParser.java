@@ -4,20 +4,25 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.SortedSet;
+import java.util.Map;
 import java.util.TreeSet;
+import java.util.function.Function;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import pl.kaszaq.agile.IssueData;
 import pl.kaszaq.agile.IssueBlockedTransition;
 import pl.kaszaq.agile.IssueStatusTransition;
 import pl.kaszaq.json.JsonNodeOptional;
 import static pl.kaszaq.Config.OBJECT_MAPPER;
-import pl.kaszaq.agile.IssueStatusMapping;
 import static pl.kaszaq.utils.DateUtils.parseDate;
 
 @Slf4j
+@AllArgsConstructor
 class JiraIssueParser {
+
+    private final Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers;
 
     IssueData parseJiraIssue(String jsonIssue) throws IOException {
         JsonNode node = OBJECT_MAPPER.readTree(jsonIssue);
@@ -28,7 +33,7 @@ class JiraIssueParser {
         JsonNodeOptional issueNode = JsonNodeOptional.of(node);
 
         String key = issueNode.get("key").asText();
-        LOG.info("Parsing issue {}", key);
+        LOG.debug("Parsing issue {}", key);
 
         JsonNodeOptional fieldsNode = issueNode.get("fields");
         String creator = fieldsNode.get("creator").get("name").asText();
@@ -54,12 +59,14 @@ class JiraIssueParser {
         List<String> components = new ArrayList<>();
         fieldsNode.get("components").elements().forEachRemaining(componentNode -> components.add(componentNode.get("name").asText()));
         // TODO: this filed should not be a part of issue but rather additional, in some custom fields map.
-        String timesheetsCode = fieldsNode.get("customfield_12450").asText();
-        if (timesheetsCode==null){
-            timesheetsCode = fieldsNode.get("customfield_15857").asText();
-        }
-        
-        
+        Map<String, Object> customFields = new HashMap<>();
+        customFieldsParsers.forEach((k, v) -> {
+            Object val = v.apply(fieldsNode);
+            if (val != null) {
+                customFields.put(k, val);
+            }
+        });
+
         IssueData issue = IssueData.builder()
                 .created(created)
                 .creator(creator)
@@ -78,7 +85,7 @@ class JiraIssueParser {
                 .type(type)
                 .labels(labels)
                 .components(components)
-                .timesheetsCode(timesheetsCode)
+                .customFields(customFields)
                 .build();
         return issue;
     }
@@ -145,7 +152,6 @@ class JiraIssueParser {
             changelogNode.get("histories").elements().forEachRemaining(changelogEntry -> {
                 String username = changelogEntry.get("author").get("name").asText();
                 ZonedDateTime createdDate = parseDate(changelogEntry.get("created").asText());
-                //LOG.debug("Parsed date of issue transition to {}", createdDate);
                 changelogEntry.get("items").elements().forEachRemaining(changelogItem -> {
                     if ("Flagged".equals(changelogItem.get("field").asText())) {
                         String fromStatus = changelogItem.get("fromString").asText();

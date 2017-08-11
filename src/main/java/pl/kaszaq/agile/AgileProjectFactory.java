@@ -9,7 +9,7 @@ public class AgileProjectFactory {
 
     public AgileProject createAgileProject(AgileProjectData projectData, IssueStatusMapping statusMapping) {
         Map<String, IssueData> transformedAgileProjectData = new HashMap<>();
-        for (Map.Entry<String, IssueData> entry : projectData.getIssues().entrySet()) {
+        projectData.getIssues().entrySet().forEach((entry) -> {
             String k = entry.getKey();
             IssueData v = entry.getValue();
             IssueData issue = IssueData.builder()
@@ -30,10 +30,10 @@ public class AgileProjectFactory {
                     .type(v.getType())
                     .labels(v.getLabels())
                     .components(v.getComponents())
-                    .timesheetsCode(v.getTimesheetsCode())
+                    .customFields(v.getCustomFields())
                     .build();
             transformedAgileProjectData.put(k, issue);
-        }
+        });
         return new AgileProject(projectData.getProjectId(), transformedAgileProjectData);
     }
 
