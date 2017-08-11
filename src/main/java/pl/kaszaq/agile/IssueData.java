@@ -1,8 +1,10 @@
 package pl.kaszaq.agile;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.TreeSet;
 import lombok.Builder;
@@ -12,6 +14,7 @@ import lombok.ToString;
 @Builder
 @Getter
 @ToString
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class IssueData {
     private final String key;
     private final String creator;
@@ -30,8 +33,7 @@ public class IssueData {
     private final List<String> components;
     private final TreeSet<IssueStatusTransition> issueStatusTransitions;
     private final TreeSet<IssueBlockedTransition> issueBlockedTransitions;
-    // TODO: this field should not be a part of issue but rather additional, in some custom fields map.
-    private final String timesheetsCode;
+    private final Map<String, Object> customFields;
 
     @JsonIgnore
     public String getPrettyName(){
