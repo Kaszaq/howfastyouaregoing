@@ -26,7 +26,7 @@ public class CycleTimeComputer {
 // TODO: add tests
 
     private final AgileProject agileProject;
-    private final String finalStatus;
+    private final Set<String> finalStatuses;
 
     public double calulcateCycleTimeOfAllIssues(Predicate<IssueData> filters, LocalDate fromDate, LocalDate toDate, String... statuses) {
         LongSummaryStatistics cycleTimeStatistics = agileProject.getAllIssues()
@@ -77,12 +77,12 @@ public class CycleTimeComputer {
     private Predicate<IssueData> wasClosed(LocalDate fromDate, LocalDate toDate) {
         return IssuePredicates.hasStatusTransitionsThat(IssueStatusTransitionPredicates.createdAfter(fromDate),
                 IssueStatusTransitionPredicates.createdBefore(toDate),
-                IssueStatusTransitionPredicates.to(finalStatus)
+                IssueStatusTransitionPredicates.to(finalStatuses)
         );
     }
 
     private boolean allSubtasksInFinalStatus(Set<IssueData> subtasks) {
-        return !subtasks.stream().anyMatch(s -> !s.getStatus().equals(finalStatus));
+        return !subtasks.stream().anyMatch(s -> !finalStatuses.contains(s.getStatus()));
     }
 
     private Set<IssueData> getSubtasks(IssueData i) {
