@@ -1,11 +1,8 @@
 package pl.kaszaq.cfd;
 
 import java.util.function.Predicate;
-import static pl.kaszaq.agile.IssuePredicates.inResolution;
-import static pl.kaszaq.agile.IssuePredicates.isEpic;
 import pl.kaszaq.agile.AgileClient;
-import pl.kaszaq.agile.IssueData;
-import static pl.kaszaq.agile.IssuePredicates.hasSubtasks;
+import pl.kaszaq.agile.Issue;
 
 public class CfdDataFactory {
 
@@ -15,7 +12,7 @@ public class CfdDataFactory {
         this.agileClient = issueProvider;
     }
 
-    public CfdData calculateCfdData(String projectId, Predicate<IssueData> filter) {
+    public CfdData calculateCfdData(String projectId, Predicate<Issue> filter) {
         // TODO: extract those filters. This should be provided as parameter!
         return agileClient.getAgileProject(projectId).getAllIssues().stream()
                 .filter(filter)

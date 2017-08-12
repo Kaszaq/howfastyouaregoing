@@ -3,15 +3,15 @@ package pl.kaszaq.workload;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
-import pl.kaszaq.agile.IssueData;
+import pl.kaszaq.agile.Issue;
 
 @Getter
 public class WorkloadDailyReport {
 
-    private final Map<IssueData, Double> reportedWorkLoadOnIssue = new HashMap<>();
+    private final Map<Issue, Double> reportedWorkLoadOnIssue = new HashMap<>();
     private double totalWorkloadOnIssues;
 
-    public void reportWorkloadOnIssue(IssueData issue, Double value) {
+    public void reportWorkloadOnIssue(Issue issue, Double value) {
         reportedWorkLoadOnIssue.merge(issue, value, Double::sum);
         totalWorkloadOnIssues += value;
     }
@@ -23,9 +23,9 @@ public class WorkloadDailyReport {
      *
      * @return percentage per each issue from the total workload
      */
-    public Map<IssueData, Double> calculateDistribution() {
+    public Map<Issue, Double> calculateDistribution() {
         Double totalVal = getTotalWorkloadOnIssues();
-        Map<IssueData, Double> workloadDistribution = new HashMap<>();
+        Map<Issue, Double> workloadDistribution = new HashMap<>();
 
         getReportedWorkLoadOnIssue().forEach((k, v) -> {
             double val = 100. * v / totalVal;

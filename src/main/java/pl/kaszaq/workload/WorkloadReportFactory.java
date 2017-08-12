@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import pl.kaszaq.agile.AgileClient;
-import pl.kaszaq.agile.IssueData;
+import pl.kaszaq.agile.Issue;
 import static pl.kaszaq.agile.IssuePredicates.hasSubtasks;
 import static pl.kaszaq.agile.IssuePredicates.inResolution;
 import static pl.kaszaq.agile.IssuePredicates.inStatusOnDay;
@@ -31,7 +31,7 @@ public class WorkloadReportFactory {
 
     public Map<LocalDate, WorkloadDailyReport> calculateWorkload(LocalDate from, LocalDate to, String projectId, String... wipStatuses) {
         Map<LocalDate, WorkloadDailyReport> workloadReport = new HashMap<>();
-        List<IssueData> issues = getValidIssues(projectId);
+        List<Issue> issues = getValidIssues(projectId);
         LocalDate date = from;
 
         while (date.isBefore(to) || date.isEqual(to)) {
@@ -42,7 +42,7 @@ public class WorkloadReportFactory {
                     .forEach(issue -> {
                         IssueHierarchyNode node = issueHierarchyNodeProvider.getHierarchy(issue);
                         Double value = 100.0;
-                        Set<IssueData> leafIssues = node.getLeafsIssues();
+                        Set<Issue> leafIssues = node.getLeafsIssues();
                         double leafIssuesValue = value / leafIssues.size();
                         leafIssues.forEach(i -> {
                             dailyReport.reportWorkloadOnIssue(i, leafIssuesValue);
@@ -59,7 +59,7 @@ public class WorkloadReportFactory {
 
     }
 
-    private List<IssueData> getValidIssues(String projectId) {
+    private List<Issue> getValidIssues(String projectId) {
         return agileClient.getAgileProject(projectId).getAllIssues().stream()
                 .filter(
                         inResolution("Won't Fix", "Cannot Reproduce", "Duplicate", "Incomplete", "Not an Issue", "Not Enough Information", "Retest", "Unresolved").negate()

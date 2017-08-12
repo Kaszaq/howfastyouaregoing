@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import pl.kaszaq.agile.AgileProject;
-import pl.kaszaq.agile.IssueData;
+import pl.kaszaq.agile.Issue;
 
 /**
  *
@@ -17,7 +17,7 @@ import pl.kaszaq.agile.IssueData;
  */
 public class IssueHierarchyNodeProvider {
 
-    Map<IssueData, IssueHierarchyNode> issuesHierarchyNodes = new HashMap<>();
+    Map<Issue, IssueHierarchyNode> issuesHierarchyNodes = new HashMap<>();
     List<Set<AgileProject>> agileProjectsGroupingOrder;
     Map<AgileProject, Set<AgileProject>> agileParentWithCurrentProjects;
     private final Set<AgileProject> allProjects;
@@ -39,7 +39,7 @@ public class IssueHierarchyNodeProvider {
                 .stream().flatMap(set -> set.stream()).collect(Collectors.toSet());
     }
 
-    public IssueHierarchyNode getHierarchy(IssueData issue) {
+    public IssueHierarchyNode getHierarchy(Issue issue) {
         return issuesHierarchyNodes.computeIfAbsent(issue, i -> {
             IssueHierarchyNode node = createHierarchyNode(i);
             reduce(node);
@@ -47,8 +47,8 @@ public class IssueHierarchyNodeProvider {
         });
     }
 
-    private IssueHierarchyNode createHierarchyNode(IssueData issue) {
-        Set<IssueData> directlyRelatedIssues = getDirectlyParentRelatedIssues(issue);
+    private IssueHierarchyNode createHierarchyNode(Issue issue) {
+        Set<Issue> directlyRelatedIssues = getDirectlyParentRelatedIssues(issue);
         IssueHierarchyNode node = new IssueHierarchyNode(issue);
         directlyRelatedIssues.forEach((directlyRelatedIssue) -> {
             node.link(createHierarchyNode(directlyRelatedIssue));
@@ -57,8 +57,8 @@ public class IssueHierarchyNodeProvider {
         return node;
     }
 
-    private Set<IssueData> getDirectlyParentRelatedIssues(IssueData issue) {
-        Set<IssueData> directlyRelatedIssues = new HashSet<>();
+    private Set<Issue> getDirectlyParentRelatedIssues(Issue issue) {
+        Set<Issue> directlyRelatedIssues = new HashSet<>();
 
         Set<AgileProject> projectsSet = getParentAndCurrentProjects(issue);
         projectsSet.forEach((agileProject) -> {
@@ -76,17 +76,17 @@ public class IssueHierarchyNodeProvider {
         return directlyRelatedIssues;
     }
 
-    private Optional<IssueData> checkParentIssue(IssueData issue, AgileProject agileProject) {
-        return Optional.of(issue).map(IssueData::getParentIssueKey).map(key -> agileProject.getIssue(key));
+    private Optional<Issue> checkParentIssue(Issue issue, AgileProject agileProject) {
+        return Optional.of(issue).map(Issue::getParentIssueKey).map(key -> agileProject.getIssue(key));
     }
 
-    private Optional<IssueData> checkEpic(IssueData issue, AgileProject agileProject) {
+    private Optional<Issue> checkEpic(Issue issue, AgileProject agileProject) {
         
         // TODO: Add support for linking through epics;
         return Optional.empty();
     }
 
-    private Optional<Set<IssueData>> checkLinkedIssues(IssueData issue, AgileProject agileProject) {
+    private Optional<Set<Issue>> checkLinkedIssues(Issue issue, AgileProject agileProject) {
         List<String> issueLinks = issue.getLinkedIssuesKeys();
         if (issueLinks != null) {
             return Optional.of(issueLinks.stream().filter(key -> agileProject.contains(key)).map(issueId -> agileProject.getIssue(issueId)).collect(Collectors.toSet()));
@@ -94,12 +94,12 @@ public class IssueHierarchyNodeProvider {
         return Optional.empty();
     }
 
-    private Set<AgileProject> getParentAndCurrentProjects(IssueData issue) {
+    private Set<AgileProject> getParentAndCurrentProjects(Issue issue) {
         AgileProject issueAgileProject = getIssueProject(issue);
         return agileParentWithCurrentProjects.get(issueAgileProject);
     }
 
-    private AgileProject getIssueProject(IssueData issue) {
+    private AgileProject getIssueProject(Issue issue) {
         return allProjects.stream().filter(project -> project.contains(issue)).findFirst().get();
     }
 
