@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import pl.kaszaq.agile.AgileProject;
 import pl.kaszaq.agile.IssueData;
 
@@ -49,7 +48,7 @@ public class IssueHierarchyNodeProvider {
     }
 
     private IssueHierarchyNode createHierarchyNode(IssueData issue) {
-        Set<IssueData> directlyRelatedIssues = getDirectlyRelatedIssues(issue);
+        Set<IssueData> directlyRelatedIssues = getDirectlyParentRelatedIssues(issue);
         IssueHierarchyNode node = new IssueHierarchyNode(issue);
         directlyRelatedIssues.forEach((directlyRelatedIssue) -> {
             node.link(createHierarchyNode(directlyRelatedIssue));
@@ -58,7 +57,7 @@ public class IssueHierarchyNodeProvider {
         return node;
     }
 
-    private Set<IssueData> getDirectlyRelatedIssues(IssueData issue) {
+    private Set<IssueData> getDirectlyParentRelatedIssues(IssueData issue) {
         Set<IssueData> directlyRelatedIssues = new HashSet<>();
 
         Set<AgileProject> projectsSet = getParentAndCurrentProjects(issue);
