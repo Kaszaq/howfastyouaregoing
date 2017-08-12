@@ -8,11 +8,11 @@ import pl.kaszaq.agile.pojo.AgileProjectData;
 public class AgileProjectFactory {
 
     public AgileProject createAgileProject(AgileProjectData projectData, IssueStatusMapping statusMapping) {
-        Map<String, IssueData> transformedAgileProjectData = new HashMap<>();
+        Map<String, Issue> transformedAgileProjectData = new HashMap<>();
         projectData.getIssues().entrySet().forEach((entry) -> {
             String k = entry.getKey();
             IssueData v = entry.getValue();
-            IssueData issue = IssueData.builder()
+            Issue issue = new Issue(IssueData.builder()
                     .created(v.getCreated())
                     .creator(v.getCreator())
                     .summary(v.getSummary())
@@ -31,7 +31,7 @@ public class AgileProjectFactory {
                     .labels(v.getLabels())
                     .components(v.getComponents())
                     .customFields(v.getCustomFields())
-                    .build();
+                    .build());
             transformedAgileProjectData.put(k, issue);
         });
         return new AgileProject(projectData.getProjectId(), transformedAgileProjectData);

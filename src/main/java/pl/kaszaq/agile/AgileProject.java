@@ -7,23 +7,23 @@ import java.util.Objects;
 
 public class AgileProject {
 
-    private final Map<String, IssueData> data;
+    private final Map<String, Issue> data;
     private final String id;
 
-    AgileProject(String id, Map<String, IssueData> data) {
+    AgileProject(String id, Map<String, Issue> data) {
         this.id = id;
         this.data = new HashMap<>(data);
     }
 
-    public Collection<IssueData> getAllIssues() {
+    public Collection<Issue> getAllIssues() {
         return new HashMap<>(data).values();
     }
 
-    public IssueData getIssue(String issueId) {
+    public Issue getIssue(String issueId) {
         return data.get(issueId);
     }
 
-    public boolean contains(IssueData issue) {
+    public boolean contains(Issue issue) {
         return data.containsKey(issue.getKey());
     }
 

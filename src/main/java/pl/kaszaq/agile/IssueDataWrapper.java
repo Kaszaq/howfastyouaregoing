@@ -16,9 +16,8 @@ import lombok.Getter;
 import pl.kaszaq.utils.DateUtils;
 
 @AllArgsConstructor
-public class IssueWrapper {
+class IssueDataWrapper {
 
-    @Getter
     private final IssueData issue;
 
     @Getter(lazy = true)
@@ -45,7 +44,7 @@ public class IssueWrapper {
     private SortedSet<LocalDate> calculateDatesInStatus(String requiredStatus) {
         TreeSet<LocalDate> datesInCurrentStatus = new TreeSet<>();
         ZonedDateTime temp = null;
-        for (IssueStatusTransition issueStatusTransition : getIssue().getIssueStatusTransitions()) {
+        for (IssueStatusTransition issueStatusTransition : issue.getIssueStatusTransitions()) {
             if (temp != null) {
                 datesInCurrentStatus.addAll(DateUtils.getCollectionOfLocalDates(temp, issueStatusTransition.getDate()));
                 temp = null;
@@ -65,7 +64,7 @@ public class IssueWrapper {
         Set<LocalDate> blockedDays = new HashSet<>();
 
         ZonedDateTime temp = null;
-        for (IssueBlockedTransition issueBlockedTransition : getIssue().getIssueBlockedTransitions()) {
+        for (IssueBlockedTransition issueBlockedTransition : issue.getIssueBlockedTransitions()) {
             if (!issueBlockedTransition.isBlocked()) {
                 blockedDays.addAll(DateUtils.getCollectionOfLocalDatesBetweenDateExclusive(temp, issueBlockedTransition.getDate()));
                 temp = null;
@@ -82,7 +81,7 @@ public class IssueWrapper {
     }
 
     private Duration calculateWorkTimeInStatus(IssueData issue, String status) {
-        return calculateTimeInStatus(issue, status, IssueWrapper::calculateDurationBetweenInWorkingHours);
+        return calculateTimeInStatus(issue, status, IssueDataWrapper::calculateDurationBetweenInWorkingHours);
     }
 
     private Duration calculateTotalTimeInStatus(IssueData issue, String status) {
@@ -118,16 +117,16 @@ public class IssueWrapper {
     }
 
     private Map<String, Duration> calculateWorkTimeInStatus() {
-        return getIssue().getIssueStatusTransitions().stream().map(t -> t.getToStatus()).distinct().collect(
+        return issue.getIssueStatusTransitions().stream().map(t -> t.getToStatus()).distinct().collect(
                 () -> new HashMap<>(),
-                (map, status) -> map.put(status, calculateWorkTimeInStatus(getIssue(), status)),
+                (map, status) -> map.put(status, calculateWorkTimeInStatus(issue, status)),
                 Map::putAll);
     }
 
     private Map<String, Duration> calculateTimeInStatus() {
-        return getIssue().getIssueStatusTransitions().stream().map(t -> t.getToStatus()).distinct().collect(
+        return issue.getIssueStatusTransitions().stream().map(t -> t.getToStatus()).distinct().collect(
                 () -> new HashMap<>(),
-                (map, status) -> map.put(status, calculateTotalTimeInStatus(getIssue(), status)),
+                (map, status) -> map.put(status, calculateTotalTimeInStatus(issue, status)),
                 Map::putAll);
     }
 }

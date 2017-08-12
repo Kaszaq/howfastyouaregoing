@@ -28,7 +28,7 @@ public class AgileClient {
         return getProject(projectId).orElseThrow(() -> new RuntimeException("Project not found"));
     }
 
-    public Optional<IssueData> getIssue(String issueId) {
+    public Optional<Issue> getIssue(String issueId) {
         Matcher m = ISSUE_PATTERN.matcher(issueId);
         if (!m.matches()) {
             return Optional.empty();
