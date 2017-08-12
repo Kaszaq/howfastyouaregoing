@@ -17,12 +17,11 @@ public class WorkloadDailyReport {
     }
 
     /**
-     * Returns as percentage per each issue from the total workload calculated.
-     * Sum should be +/- 100 - the offset from 100 is caused by computional
-     * precision of calculations.
+     * Returns as percentage per each issue from the total workload
+     * calculated.Sum should be +/- 100 - the offset from 100 is caused by
+     * computional precision of calculations.
      *
-     * @param value
-     * @return
+     * @return percentage per each issue from the total workload
      */
     public Map<IssueData, Double> calculateDistribution() {
         Double totalVal = getTotalWorkloadOnIssues();

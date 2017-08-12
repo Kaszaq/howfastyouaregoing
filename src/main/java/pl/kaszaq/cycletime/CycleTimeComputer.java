@@ -28,8 +28,7 @@ public class CycleTimeComputer {
     private final AgileProject agileProject;
     private final String finalStatus;
 
-    public double calulcateCycleTimeOfAllIssues(Predicate<IssueData> filters, LocalDate toDate, LocalDate fromDate,
-            String... statuses) {
+    public double calulcateCycleTimeOfAllIssues(Predicate<IssueData> filters, LocalDate fromDate, LocalDate toDate, String... statuses) {
         LongSummaryStatistics cycleTimeStatistics = agileProject.getAllIssues()
                 .stream()
                 .filter(filters.and(wasClosed(fromDate, toDate)))
@@ -40,13 +39,13 @@ public class CycleTimeComputer {
 
     /**
      * Counts time of stories closed within specified dates since first of its subtasks entered any of statuses till last one left any of statuses.This time will be counted only when all subtasks are in final status.
-     * @param filters
-     * @param toDate
+     * @param filters common filters applied to issues
+     * @param toDate 
      * @param fromDate
      * @param statuses
      * @return
      */
-    public double calulcateCycleTimeOfStories(Predicate<IssueData> filters, LocalDate toDate, LocalDate fromDate,  String... statuses) {
+    public double calulcateCycleTimeOfStories(Predicate<IssueData> filters, LocalDate fromDate, LocalDate toDate, String... statuses) {
         List<Duration> durations = new ArrayList<>();
         agileProject.getAllIssues().stream()
                 .filter(filters.and(hasSubtasks().and(wasClosed(fromDate, toDate))))
