@@ -1,5 +1,5 @@
 # How fast are you going #
-This is a library that helps analyze data from JIRA. Once connected to JIRA, it pulls all issue data for requested project to cache. This allows very quick data analysis without requirement to pull data from server each time you run your project. Moreover if any data was updated in JIRAit will be automatically synchronized with local cache - only issues that did change will be pulled from the server.
+This is a library that helps analyze data from JIRA. Once connected to JIRA, it pulls all issue data for requested project to cache. This allows very quick data analysis without requirement to pull data from server each time you run your project. Moreover if any data was updated in JIRA it will be automatically synchronized with local cache - only issues that did change will be pulled from the server.
 
 ### Motivation
 Initially I had problem with JIRA - as awesome as this tool is it does lack in terms of data analysis. For instance for some reason my CFD drawn by JIRA had a huge hole at some point in time.
