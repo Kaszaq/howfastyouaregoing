@@ -176,8 +176,7 @@ public class JiraAgileProjectProvider implements AgileProjectProvider {
                     issues.put(issueData.getKey(), issueData);
                 }
 
-                ZonedDateTime lastUpdated = ZonedDateTime.now();
-                projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, lastUpdated, issues, customFieldsNames);
+                projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, lastUpdatedIssue, issues, customFieldsNames);
                 saveProjectToFile(projectData);
             }
         }
