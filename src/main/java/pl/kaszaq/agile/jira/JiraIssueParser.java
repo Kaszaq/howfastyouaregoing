@@ -93,7 +93,10 @@ class JiraIssueParser {
     private List<String> getSubtasksKeys(JsonNodeOptional fieldsNode) {
         List<String> subtasksKeys = new ArrayList<>();
         fieldsNode.get("subtasks").elements().forEachRemaining(subtaskNode -> {
-            subtasksKeys.add(subtaskNode.get("key").asText());
+            String key = subtaskNode.get("key").asText();
+            if (key != null) {
+                subtasksKeys.add(key);
+            }
         });
         return subtasksKeys;
     }
@@ -102,9 +105,15 @@ class JiraIssueParser {
         List<String> linkedIssuesKeys = new ArrayList<>();
         fieldsNode.get("issuelinks").elements().forEachRemaining(issueLinkNode -> {
             if (issueLinkNode.has("outwardIssue")) {
-                linkedIssuesKeys.add(issueLinkNode.get("outwardIssue").get("key").asText());
+                String key = issueLinkNode.get("outwardIssue").get("key").asText();
+                if (key != null) { // TODO these checks (if key !=null) were added just because obfuscated data has null, it should not be possible with normal data. Wort considering either modifying example data or decdigint whether this is ok.
+                    linkedIssuesKeys.add(key);
+                }
             } else {
-                linkedIssuesKeys.add(issueLinkNode.get("inwardIssue").get("key").asText());
+                String key = issueLinkNode.get("inwardIssue").get("key").asText();
+                if (key != null) {
+                    linkedIssuesKeys.add(key);
+                }
             }
         });
         return linkedIssuesKeys;

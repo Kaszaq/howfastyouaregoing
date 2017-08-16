@@ -25,7 +25,7 @@ public class AgileClient {
 
 
     public AgileProject getAgileProject(String projectId) {
-        return getProject(projectId).orElseThrow(() -> new RuntimeException("Project not found"));
+        return getProject(projectId).orElseThrow(() -> new RuntimeException("Project " +projectId+" not found"));
     }
 
     public Optional<Issue> getIssue(String issueId) {
