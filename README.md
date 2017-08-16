@@ -19,14 +19,14 @@ And from that point I started to increase capabilities of this library to be abl
 3. Some classes to help calculate data like `CFD`, `cycle time` etc. .
 4. Examples with sample data. [soon]
 
-### Installation
-Library is available in [![Maven Central](https://maven-badges.herokuapp.com/maven-central/pl.kaszaq.agile/how-fast-you-are-going/badge.svg)](https://maven-badges.herokuapp.com/maven-central/pl.kaszaq.agile/how-fast-you-are-going)
+### Binaries
+Library is available in [![Maven Central](https://maven-badges.herokuapp.com/maven-central/pl.kaszaq.howfastyouaregoing/howfastyouaregoing-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/pl.kaszaq.howfastyouaregoing/howfastyouaregoing-core)
 
 ```xml
 <dependency>
-    <groupId>pl.kaszaq.agile</groupId>
-    <artifactId>how-fast-you-are-going</artifactId>
-    <version>0.1</version>
+    <groupId>pl.kaszaq.howfastyouaregoing</groupId>
+    <artifactId>howfastyouaregoing-core</artifactId>
+    <version>0.2</version>
 </dependency>
 ```
 
