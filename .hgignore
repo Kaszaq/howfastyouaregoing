@@ -1,8 +1,5 @@
 syntax: glob
-cache/
 target/
 nbproject/
-src/main/resources/config.properties
 nb-configuration.xml
-src/main/java/pl/kaszaq/Main.java
 dependency-reduced-pom.xml
