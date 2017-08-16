@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pl.kaszaq.howfastyouaregoing</groupId>
     <artifactId>howfastyouaregoing-core</artifactId>
-    <version>0.2</version>
+    <version>0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>HowFastYouAreGoing</name>
+    <name>HowFastYouAreGoing core</name>
     <description>Library that helps to work on agile data, for instance retrieved from Jira and caches it locally.</description>
     <url>https://bitbucket.org/kaszaq/howfastyouaregoing</url>
     
