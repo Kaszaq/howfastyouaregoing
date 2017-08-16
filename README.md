@@ -72,7 +72,7 @@ If you think you can contribute something please create an issue with descriptio
 
 ### Feedback
 
-I'd really love to hear your feedback - if you can please give me one using [issue tracker](https://bitbucket.org/kaszaq/how-fast-are-you-going/issues)
+I'd really love to hear your feedback - if you can please give me one using [issue tracker](https://bitbucket.org/kaszaq/howfastyouaregoing/issues)
 
 ### License
 Copyright 2017 Michał Kasza
