@@ -1,4 +1,4 @@
-# How fast are you going #
+# How fast you are going #
 This is a library that helps analyze data from JIRA. Once connected to JIRA, it pulls all issue data for requested project to cache. This allows very quick data analysis without requirement to pull data from server each time you run your project. Moreover if any data was updated in JIRA it will be automatically synchronized with local cache - only issues that did change will be pulled from the server.
 
 ### Features
