@@ -19,7 +19,7 @@ import org.apache.http.util.EntityUtils;
 import static pl.kaszaq.howfastyouaregoing.Config.OBJECT_MAPPER;
 
 @Slf4j
-public class HttpClient {
+public class HttpClient implements AutoCloseable {
 
     private final CloseableHttpClient httpClient;
 
@@ -61,5 +61,10 @@ public class HttpClient {
             response = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
         }
         return response;
+    }
+
+    @Override
+    public void close() throws Exception {
+        httpClient.close();
     }
 }

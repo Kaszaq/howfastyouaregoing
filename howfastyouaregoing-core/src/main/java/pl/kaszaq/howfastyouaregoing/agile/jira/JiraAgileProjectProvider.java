@@ -32,26 +32,30 @@ public class JiraAgileProjectProvider implements AgileProjectProvider {
 // TODO: move from here Jira part and part responsible for storing project.
 
     private static final ZonedDateTime INITIAL_DATE = ZonedDateTime.of(1970, Month.JANUARY.getValue(), 1, 0, 0, 0, 0, ZoneId.systemDefault());
-    public static final int MINUTES_UNTIL_UPDATE_REQUESTED = 15;
+
     private final JiraIssueParser issueParser;
     private final HttpClient httpClient;
     private final File jiraCacheDirectory;
     private final File jiraCacheIssuesDirectory;
     private final String jiraSearchEndpoint;
     private final Set<String> customFieldsNames;
+    private final int minutesUntilUpdate;
 
     JiraAgileProjectProvider(
             HttpClient client,
             File jiraCacheDirectory,
             File jiraCacheIssuesDirectory,
             String jiraSearchEndpoint,
-            Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers) {
+            Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers,
+            int minutesUntilUpdate) {
         this.jiraCacheDirectory = jiraCacheDirectory;
         this.jiraCacheIssuesDirectory = jiraCacheIssuesDirectory;
         this.jiraSearchEndpoint = jiraSearchEndpoint;
+        // todo: it should be possible to close this client
         this.httpClient = client;
         this.issueParser = new JiraIssueParser(customFieldsParsers);
         this.customFieldsNames = new HashSet<>(customFieldsParsers.keySet());
+        this.minutesUntilUpdate = minutesUntilUpdate;
     }
 
     @Override
@@ -80,7 +84,7 @@ public class JiraAgileProjectProvider implements AgileProjectProvider {
     }
 
     private boolean requiresUpdate(AgileProjectData project) {
-        return project.getLastUpdated().isBefore(ZonedDateTime.now().minusMinutes(MINUTES_UNTIL_UPDATE_REQUESTED));
+        return project.getLastUpdated().isBefore(ZonedDateTime.now().minusMinutes(minutesUntilUpdate));
     }
 
     private Optional<AgileProjectData> loadProjectFromFile(String projectId) throws IOException {
@@ -118,6 +122,7 @@ public class JiraAgileProjectProvider implements AgileProjectProvider {
         int maxResults = 50;
         int startAt = 0;
         int total = 0;
+        ZonedDateTime lastUpdatedIssue;
         do {
             //TODO: maybe bound fields list here to list that is inside POJO and use it instead?
             JiraSearchRequest searchRequest = JiraSearchRequest.builder()
@@ -133,8 +138,7 @@ public class JiraAgileProjectProvider implements AgileProjectProvider {
             startAt = tree.get("startAt").asInt();
             total = tree.get("total").asInt();
 
-            ZonedDateTime lastUpdatedIssue = projectData.getLastUpdatedIssue();
-            ZonedDateTime lastUpdated = projectData.getLastUpdated();
+            lastUpdatedIssue = projectData.getLastUpdatedIssue();
             Map<String, IssueData> issues = new HashMap<>(projectData.getIssues());
             Iterator<JsonNode> issuesIterator = tree.get("issues").elements();
             while (issuesIterator.hasNext()) {
@@ -144,17 +148,17 @@ public class JiraAgileProjectProvider implements AgileProjectProvider {
                     lastUpdatedIssue = issueData.getUpdated();
                 }
                 issues.put(issueData.getKey(), issueData);
-                lastUpdated = ZonedDateTime.now();
                 try {
                     OBJECT_MAPPER.writeValue(getIssueFile(issueData.getKey()), node);
                 } catch (IOException ex) {
                     LOG.warn("Unable to store vanila jira issue data. Issue id: {}", issueData.getKey(), ex);
                 }
             };
-            projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, lastUpdated, issues, customFieldsNames);
+            projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, lastUpdatedIssue, issues, customFieldsNames);
             saveProjectToFile(projectData);
             startAt = startAt + maxResults;
         } while (startAt < total);
+        projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, ZonedDateTime.now(), new HashMap<>(projectData.getIssues()), customFieldsNames);
         return projectData;
     }
 
