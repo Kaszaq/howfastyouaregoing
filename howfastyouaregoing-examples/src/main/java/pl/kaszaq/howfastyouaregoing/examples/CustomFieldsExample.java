@@ -32,7 +32,7 @@ public class CustomFieldsExample {
                 ))
                 .build();
 
-        agileClient = AgileClientFactory.getInstance().newClient()
+        agileClient = AgileClientFactory.newClient()
                 .withAgileProjectProvider(agileProjectProvider)
                 .create();
 

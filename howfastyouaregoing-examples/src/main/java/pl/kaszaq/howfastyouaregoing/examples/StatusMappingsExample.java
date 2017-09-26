@@ -44,7 +44,7 @@ public class StatusMappingsExample {
                 .withJsession("cookievalue")
                 .withCacheDir(new File("src/main/resources/cache/"))
                 .withJiraUrl("http://localhost:8080/").build();
-        return AgileClientFactory.getInstance().newClient()
+        return AgileClientFactory.newClient()
                 .withAgileProjectProvider(agileProjectProvider)
                 .create();
     }
@@ -55,7 +55,7 @@ public class StatusMappingsExample {
                 .withCacheDir(new File("src/main/resources/cache/"))
                 .withJiraUrl("http://localhost:8080/")
                 .build();
-        return AgileClientFactory.getInstance().newClient()
+        return AgileClientFactory.newClient()
                 .withAgileProjectProvider(agileProjectProvider)
                 .withAgileProjectConfig("MYPROJECTID",
                         AgileProjectConfiguration.builder()
