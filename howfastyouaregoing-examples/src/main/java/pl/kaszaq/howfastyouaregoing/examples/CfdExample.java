@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import pl.kaszaq.howfastyouaregoing.agile.AgileClient;
+import pl.kaszaq.howfastyouaregoing.agile.AgileProject;
 import pl.kaszaq.howfastyouaregoing.cfd.CfdData;
 import pl.kaszaq.howfastyouaregoing.cfd.CfdDataComputer;
 import static pl.kaszaq.howfastyouaregoing.utils.CommonPredicates.alwaysTrue;
@@ -18,7 +19,8 @@ public class CfdExample {
     }
 
     private static void runExample(AgileClient agileClient) {
-        CfdData data = new CfdDataComputer(agileClient).calculateCfdData("MYPROJECTID", alwaysTrue());
+        AgileProject project = agileClient.getAgileProject("MYPROJECTID");
+        CfdData data = CfdDataComputer.calculateCfdData(project, alwaysTrue());
 
         Map<String, Integer> statusValues = new HashMap<>();
         List<String> statusOrder = data.getDailyTransitions().values().stream().flatMap(tr -> tr.getStatusChanges().keySet().stream()).distinct().filter(s -> s != null).collect(Collectors.toList());
