@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AgileClient {
 
     private static final Pattern ISSUE_PATTERN = Pattern.compile("(\\w+)-\\d+.*");
-    private final Map<String, Optional<AgileProject>> agileProjects = new HashMap<>();
+    private final Map<String, AgileProject> agileProjects = new HashMap<>();
     private final AgileProjectProvider agileProjectProvider;
     private final Map<String, AgileProjectConfiguration> projectsConfiguration;
     private final AgileProjectConfiguration DEFAULT_PROJECT_CONFIGURATION = AgileProjectConfiguration.builder().build();
@@ -39,7 +39,7 @@ public class AgileClient {
     }
 
     private Optional<AgileProject> getProject(String projectId) {
-        return agileProjects.computeIfAbsent(projectId, id -> agileProjectProvider.loadProject(id, getConfiguration(id)));
+        return Optional.ofNullable(agileProjects.computeIfAbsent(projectId, id -> agileProjectProvider.loadProject(id, getConfiguration(id)).orElse(null)));
     }
 
     private AgileProjectConfiguration getConfiguration(String id) {
