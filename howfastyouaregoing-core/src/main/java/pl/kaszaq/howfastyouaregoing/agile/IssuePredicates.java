@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableSet;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -31,7 +33,7 @@ public class IssuePredicates {
     public static Predicate<Issue> hasSubtasks() {
         return issue -> !issue.getSubtaskKeys().isEmpty();
     }
-    
+
     public static Predicate<Issue> isSubtask() {
         return issue -> issue.isSubtask();
     }
@@ -40,31 +42,76 @@ public class IssuePredicates {
         return issue -> issue.getType().equals("Epic");
     }
 
+    public static Predicate<Issue> isType(String... acceptableTypes) {
+        return IssuePredicates.isType(ImmutableSet.copyOf(acceptableTypes));
+    }
+
+    public static Predicate<Issue> isType(Set<String> acceptableTypes) {
+        return issue -> acceptableTypes.contains(issue.getType());
+    }
+
+    public static Predicate<Issue> reportedBy(String... reporters) {
+        return reportedBy(ImmutableSet.copyOf(reporters));
+    }
+
+    public static Predicate<Issue> reportedBy(Set<String> allowedReporters) {
+        return issue -> issue.getCreator() != null && allowedReporters.contains(issue.getCreator());
+    }
+
     public static Predicate<Issue> inResolution(String... resolutions) {
-        Set<String> allowedStatuses = ImmutableSet.copyOf(resolutions);
-        return issue -> issue.getResolution() != null && allowedStatuses.contains(issue.getResolution());
+        return inResolution(ImmutableSet.copyOf(resolutions));
+    }
+
+    public static Predicate<Issue> inResolution(Set<String> allowedResolutions) {
+        return issue -> issue.getResolution() != null && allowedResolutions.contains(issue.getResolution());
     }
 
     public static Predicate<Issue> inStatus(String... statusNames) {
-        Set<String> allowedStatuses = ImmutableSet.copyOf(statusNames);
-        return issue -> allowedStatuses.contains(issue.getStatus());
+        return inStatus(ImmutableSet.copyOf(statusNames));
     }
 
-    public static Predicate<Issue> hasComponents(String... components) {
-        Set<String> requiredComponents = ImmutableSet.copyOf(components);
+    public static Predicate<Issue> inStatus(Set<String> allowedStatuses) {
+        return issue
+                -> allowedStatuses.contains(issue.getStatus());
+    }
+
+    public static Predicate<Issue> hasAllComponents(String... components) {
+        return hasAllComponents(ImmutableSet.copyOf(components));
+    }
+
+    public static Predicate<Issue> hasAllComponents(Set<String> requiredComponents) {
         return issue -> issue.getComponents().containsAll(requiredComponents);
     }
 
-    public static Predicate<Issue> hasLabels(String... labels) {
-        Set<String> requiredLabels = ImmutableSet.copyOf(labels);
+    public static Predicate<Issue> hasAllLabels(String... labels) {
+        return hasAllLabels(ImmutableSet.copyOf(labels));
+    }
+
+    public static Predicate<Issue> hasAllLabels(Set<String> requiredLabels) {
         return issue -> issue.getLabels().containsAll(requiredLabels);
+    }
+
+    public static Predicate<Issue> hasAnyComponents(String... components) {
+        return hasAnyComponents(ImmutableSet.copyOf(components));
+    }
+
+    public static Predicate<Issue> hasAnyComponents(Set<String> requiredComponents) {
+        return issue -> !Collections.disjoint(issue.getComponents(), requiredComponents);
+    }
+
+    public static Predicate<Issue> hasAnyLabels(String... labels) {
+        return hasAnyLabels(ImmutableSet.copyOf(labels));
+    }
+
+    public static Predicate<Issue> hasAnyLabels(Set<String> requiredLabels) {
+        return issue -> !Collections.disjoint(issue.getLabels(), requiredLabels);
     }
 
     public static Predicate<Issue> inStatusOnDay(LocalDate date, String... statusNames) {
         Set<String> allowedStatuses = ImmutableSet.copyOf(statusNames);
-        return issue ->  issue.isStatusOnDay(date, allowedStatuses);
+        return issue -> issue.isStatusOnDay(date, allowedStatuses);
     }
-    
+
     public static Predicate<Issue> isBlockedEntireDay(LocalDate date) {
         return issue -> issue.getAllDayBlockedDays().contains(date);
     }

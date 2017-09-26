@@ -1,6 +1,7 @@
 package pl.kaszaq.howfastyouaregoing.agile;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeSet;
 import pl.kaszaq.howfastyouaregoing.agile.pojo.AgileProjectData;
@@ -41,16 +42,33 @@ public class AgileProjectFactory {
         if (statusMapping == null) {
             return v.getIssueStatusTransitions();
         }
+
         TreeSet<IssueStatusTransition> newStatusTransitionSet = new TreeSet<>();
+
+        String previousStatus = null;
         for (IssueStatusTransition issueStatusTransition : v.getIssueStatusTransitions()) {
+            String newFromStatus = issueStatusTransition.getFromStatus();
+            String newToStatus = issueStatusTransition.getToStatus();
+            
+            newFromStatus = fixStatusFlowContinuityIfBroken(previousStatus, newFromStatus);
+            previousStatus = newToStatus;
+            
             IssueStatusTransition newStatusTransition
                     = new IssueStatusTransition(
                             issueStatusTransition.getUser(),
                             issueStatusTransition.getDate(),
-                            statusMapping.mapStatus(issueStatusTransition.getFromStatus()),
-                            statusMapping.mapStatus(issueStatusTransition.getToStatus()));
+                            statusMapping.mapStatus(newFromStatus),
+                            statusMapping.mapStatus(newToStatus));
             newStatusTransitionSet.add(newStatusTransition);
         }
         return newStatusTransitionSet;
+    }
+
+    private String fixStatusFlowContinuityIfBroken(String previousStatus, String newFromStatus) {
+        if ((previousStatus == null && newFromStatus != null)
+                || (previousStatus != null && !previousStatus.equals(newFromStatus))) {
+            newFromStatus = previousStatus;
+        }
+        return newFromStatus;
     }
 }

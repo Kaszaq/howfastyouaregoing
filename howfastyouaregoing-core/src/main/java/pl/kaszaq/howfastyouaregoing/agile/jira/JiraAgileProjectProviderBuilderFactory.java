@@ -29,6 +29,7 @@ public class JiraAgileProjectProviderBuilderFactory {
         private String password;
         private File cacheDir;
         private String jiraUrl;
+        private int minutesUntilUpdate = 15;
         private Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers = Collections.emptyMap();
 
         private JiraAgileProjectProviderBuilder(String username, String password) {
@@ -52,6 +53,12 @@ public class JiraAgileProjectProviderBuilderFactory {
             this.cacheDir = cacheDir;
             return this;
         }
+
+        public JiraAgileProjectProviderBuilder withMinutesUntilUpdate(int minutesUntilUpdate) {
+            this.minutesUntilUpdate = minutesUntilUpdate;
+            return this;
+        }
+
         public JiraAgileProjectProviderBuilder withCustomFieldsParsers(
                 Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers) {
             this.customFieldsParsers = customFieldsParsers;
@@ -78,7 +85,7 @@ public class JiraAgileProjectProviderBuilderFactory {
             jiraCacheDirectory.mkdirs();
             jiraCacheIssuesDirectory.mkdirs();
             String jiraSearchUrl = jiraUrl + "/rest/api/2/search";
-            return new JiraAgileProjectProvider(client, jiraCacheDirectory, jiraCacheIssuesDirectory, jiraSearchUrl, customFieldsParsers);
+            return new JiraAgileProjectProvider(client, jiraCacheDirectory, jiraCacheIssuesDirectory, jiraSearchUrl, customFieldsParsers, minutesUntilUpdate);
         }
 
     }

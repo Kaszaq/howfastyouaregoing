@@ -3,12 +3,10 @@ package pl.kaszaq.howfastyouaregoing.cfd;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import pl.kaszaq.howfastyouaregoing.agile.IssueStatusTransition;
-import static pl.kaszaq.howfastyouaregoing.utils.DateUtils.printSimpleDate;
 
 public class CfdData {
 
