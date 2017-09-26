@@ -30,7 +30,7 @@ AgileProjectProvider agileProjectProvider = JiraAgileProjectProviderBuilderFacto
                 .build();
 
 // configure client
-AgileClient agileClient = AgileClientFactory.getInstance().newClient()
+AgileClient agileClient = AgileClientFactory.newClient()
         .withAgileProjectProvider(agileProjectProvider)
         .create()
 

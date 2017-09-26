@@ -2,22 +2,14 @@ package pl.kaszaq.howfastyouaregoing.agile;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.experimental.UtilityClass;
 
 /**
  *
  * @author michal.kasza
  */
+@UtilityClass
 public class AgileClientFactory {
-
-    private static AgileClientFactory INSTANCE = new AgileClientFactory();
-
-    private AgileClientFactory() {
-    }
-
-    public static AgileClientFactory getInstance() {
-        return INSTANCE;
-    }
-//    
 
     public AgileClientConstructor newClient() {
         return new AgileClientConstructor();

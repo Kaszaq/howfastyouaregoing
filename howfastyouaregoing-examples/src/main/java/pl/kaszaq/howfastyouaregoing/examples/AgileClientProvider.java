@@ -10,15 +10,15 @@ import pl.kaszaq.howfastyouaregoing.agile.jira.JiraAgileProjectProviderBuilderFa
 public class AgileClientProvider {
 
     public static AgileClient createClient() {
-        Config.cacheOnly=true; //This setting will cause project not to 
-        
+        Config.cacheOnly = true; //This setting will cause project not to 
+
         AgileProjectProvider agileProjectProvider = JiraAgileProjectProviderBuilderFactory
                 .withJsession("cookievalue")
                 .withCacheDir(new File("src/main/resources/cache/"))
                 .withJiraUrl("http://localhost:8080/")
                 .build();
-        
-        return AgileClientFactory.getInstance().newClient()
+
+        return AgileClientFactory.newClient()
                 .withAgileProjectProvider(agileProjectProvider)
                 .create();
     }
