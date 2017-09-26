@@ -3,10 +3,12 @@ package pl.kaszaq.howfastyouaregoing.examples;
 import com.google.common.collect.Sets;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.HashSet;
+import java.util.OptionalDouble;
+import java.util.SortedMap;
 import pl.kaszaq.howfastyouaregoing.agile.AgileClient;
 import pl.kaszaq.howfastyouaregoing.agile.AgileProject;
 import static pl.kaszaq.howfastyouaregoing.agile.IssuePredicates.hasSubtasks;
-import static pl.kaszaq.howfastyouaregoing.agile.IssuePredicates.isSubtask;
 import pl.kaszaq.howfastyouaregoing.cycletime.CycleTimeComputer;
 
 public class CycleTimeExample {
@@ -20,42 +22,23 @@ public class CycleTimeExample {
     private static void runExample(AgileClient agileClient) {
         LocalDate from = LocalDate.of(2011, Month.JULY, 1);
         int daysAverage = 30;
-        LocalDate to = from.plusDays(daysAverage);
-        System.out.println(
-                "\tCycle time for stories [hours]"
-                + "\tCycle time for subtasks [hours]"
-                + "\tCycle time for tasks without subtasks [hours]");
-        while (to.isBefore(LocalDate.of(2014, Month.JANUARY, 1))) {
-            cycleTimeExample(agileClient, from, to);
-            from = from.plusDays(daysAverage);
-            to = to.plusDays(daysAverage);
-        }
-    }
-
-    private static void cycleTimeExample(AgileClient agileClient, LocalDate fromDate, LocalDate toDate) {
-       
+        LocalDate to = LocalDate.of(2014, Month.JANUARY, 1);
         AgileProject agileProject = agileClient.getAgileProject("MYPROJECTID");
         String[] cycleTimeStatuses = {"In Progress", "Ready for Testing"};
-        CycleTimeComputer computer = new CycleTimeComputer(agileProject, Sets.newHashSet("Closed"));
+        final HashSet<String> finalStatuses = Sets.newHashSet("Closed");
 
-        System.out.print(toDate);
+        SortedMap<LocalDate, Double> cycleTime = CycleTimeComputer.calulcateCycleTime(agileProject, hasSubtasks().negate(), finalStatuses, cycleTimeStatuses);
 
-        double calulcateCycleTimeOfStories = computer.calulcateCycleTimeOfStories(
-                hasSubtasks(), 
-                fromDate, toDate, cycleTimeStatuses);
-        
-        System.out.print("\t" + (calulcateCycleTimeOfStories > 0 ? NumberUtils.prettyPrint(calulcateCycleTimeOfStories) : ""));
+        System.out.println(
+                "\tCycle time for issues that do not have sub tasks in hours");
+        for (LocalDate k = from; !k.isAfter(to); k = k.plusDays(daysAverage)) {
+            OptionalDouble valueOptional = cycleTime.subMap(k.minusDays(daysAverage), k.plusDays(1)).values().stream()
+                    .mapToDouble(val -> val)
+                    .average();
+            if (valueOptional.isPresent()) {
+                System.out.println(k + "\t" + valueOptional.getAsDouble());
+            }
+        }
 
-        double calulcateCycleTimeOfSubtasks = computer.calulcateCycleTimeOfAllIssues(
-                isSubtask(), 
-                fromDate, toDate, cycleTimeStatuses);
-        System.out.print("\t" + (calulcateCycleTimeOfSubtasks > 0 ? NumberUtils.prettyPrint(calulcateCycleTimeOfSubtasks) : ""));
-
-        double calulcateCycleTimeOfAllIssuesWithoutSubtasks = computer.calulcateCycleTimeOfAllIssues(
-                hasSubtasks().negate().and(isSubtask().negate()), 
-                fromDate, toDate, cycleTimeStatuses);
-        System.out.print("\t" + (calulcateCycleTimeOfAllIssuesWithoutSubtasks > 0 ? NumberUtils.prettyPrint(calulcateCycleTimeOfAllIssuesWithoutSubtasks) : ""));
-        System.out.println();
     }
-
 }
