@@ -20,7 +20,7 @@ public class AgileClient {
 
     AgileClient(Map<String, AgileProjectConfiguration> configuration, AgileProjectProvider agileProjectProvider) {
         this.projectsConfiguration = configuration;
-        this.agileProjectProvider=agileProjectProvider;
+        this.agileProjectProvider = agileProjectProvider;
     }
 
 

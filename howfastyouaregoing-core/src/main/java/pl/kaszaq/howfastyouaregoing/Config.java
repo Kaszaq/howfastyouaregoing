@@ -8,15 +8,6 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 
 public class Config {
 
-    /**
-     * Causes not to call external services and use only cached data.
-     *
-     * @deprecated this should not be used in most real live cases - mostly
-     * useful for development. This flag may and probably will be
-     * removed/replaced in future.
-     */
-    @Deprecated
-    public volatile static boolean cacheOnly = false;
     public static boolean refreshUnclosed = false;
 
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();

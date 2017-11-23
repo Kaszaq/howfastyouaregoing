@@ -1,11 +1,9 @@
 package pl.kaszaq.howfastyouaregoing.agile.jira;
 
-import pl.kaszaq.howfastyouaregoing.agile.AgileProjectProvider;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
-import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -13,42 +11,32 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
-import pl.kaszaq.howfastyouaregoing.Config;
 import static pl.kaszaq.howfastyouaregoing.Config.OBJECT_MAPPER;
-import pl.kaszaq.howfastyouaregoing.agile.AgileProject;
 import pl.kaszaq.howfastyouaregoing.agile.pojo.AgileProjectData;
 import pl.kaszaq.howfastyouaregoing.http.HttpClient;
 import pl.kaszaq.howfastyouaregoing.json.JsonNodeOptional;
-import pl.kaszaq.howfastyouaregoing.agile.AgileProjectConfiguration;
-import pl.kaszaq.howfastyouaregoing.agile.AgileProjectFactory;
+import pl.kaszaq.howfastyouaregoing.agile.AgileProjectDataObserver;
 import pl.kaszaq.howfastyouaregoing.agile.IssueData;
 
 @Slf4j
-public class JiraAgileProjectProvider implements AgileProjectProvider {
-// TODO: move from here Jira part and part responsible for storing project.
-
-    private static final ZonedDateTime INITIAL_DATE = ZonedDateTime.of(1970, Month.JANUARY.getValue(), 1, 0, 0, 0, 0, ZoneId.systemDefault());
+public class JiraAgileProjectDataReader implements AgileProjectDataReader {
 
     private final JiraIssueParser issueParser;
     private final HttpClient httpClient;
-    private final File jiraCacheDirectory;
     private final File jiraCacheIssuesDirectory;
     private final String jiraSearchEndpoint;
     private final Set<String> customFieldsNames;
     private final int minutesUntilUpdate;
 
-    JiraAgileProjectProvider(
+    JiraAgileProjectDataReader(
             HttpClient client,
-            File jiraCacheDirectory,
             File jiraCacheIssuesDirectory,
             String jiraSearchEndpoint,
             Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers,
             int minutesUntilUpdate) {
-        this.jiraCacheDirectory = jiraCacheDirectory;
         this.jiraCacheIssuesDirectory = jiraCacheIssuesDirectory;
         this.jiraSearchEndpoint = jiraSearchEndpoint;
         // todo: it should be possible to close this client
@@ -59,45 +47,19 @@ public class JiraAgileProjectProvider implements AgileProjectProvider {
     }
 
     @Override
-    public Optional<AgileProject> loadProject(String projectId, AgileProjectConfiguration configuration) {
-        try {
-            Optional<AgileProjectData> projectDataOptional = loadProjectFromFile(projectId);
-            AgileProjectData projectData = projectDataOptional.orElse(createNewEmptyProject(projectId));
-            if (!customFieldsNames.equals(projectData.getCustomFieldsNames())) {
-                LOG.info("Noticied different setup of custom fields. Forcing to recreate project.");
-                projectData = createNewEmptyProject(projectId);
+    public AgileProjectData updateProject(AgileProjectData projectData, AgileProjectDataObserver observer, boolean cacheOnly) throws IOException {
+        if (requiresUpdate(projectData)) {
+            projectData = tryUpdateFromLocalJiraFiles(projectData, observer);
+            if (!cacheOnly) {
+                projectData = updateCachedProject(projectData, observer);
             }
-            projectData = tryUpdateFromLocalJiraFiles(projectData);
-            if (!Config.cacheOnly && requiresUpdate(projectData)) {
-                projectData = updateCachedProject(projectData);
-            }
-
-            return Optional.of(new AgileProjectFactory().createAgileProject(projectData, configuration.getIssueStatusMapping()));
-        } catch (IOException ex) {
-            LOG.warn("Problem while reading project data of project {}" + projectId, ex);
-            return Optional.empty();
         }
-    }
-
-    private AgileProjectData createNewEmptyProject(String projectId) {
-        return new AgileProjectData(projectId, INITIAL_DATE, INITIAL_DATE, new HashMap<>(), customFieldsNames);
+        observer.updated(projectData, 1.0);
+        return projectData;
     }
 
     private boolean requiresUpdate(AgileProjectData project) {
         return project.getLastUpdated().isBefore(ZonedDateTime.now().minusMinutes(minutesUntilUpdate));
-    }
-
-    private Optional<AgileProjectData> loadProjectFromFile(String projectId) throws IOException {
-        File projectFile = getProjectFile(projectId);
-        if (projectFile.exists()) {
-            return Optional.of(OBJECT_MAPPER.readValue(projectFile, AgileProjectData.class));
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    private File getProjectFile(String projectId) {
-        return new File(jiraCacheDirectory, projectId + ".json");
     }
 
     private File getIssueFile(String issueId) {
@@ -109,12 +71,7 @@ public class JiraAgileProjectProvider implements AgileProjectProvider {
 
     }
 
-    private void saveProjectToFile(AgileProjectData project) throws IOException {
-        File projectFile = getProjectFile(project.getProjectId());
-        OBJECT_MAPPER.writeValue(projectFile, project);
-    }
-
-    private AgileProjectData updateCachedProject(AgileProjectData projectData) throws IOException {
+    private AgileProjectData updateCachedProject(AgileProjectData projectData, AgileProjectDataObserver observer) throws IOException {
         // TODO: the time zone should be taken from user configuration on jira side.
         ZoneId userJiraZoneId = ZoneId.systemDefault();
         String lastUpdatedQueryValue = projectData.getLastUpdatedIssue().withZoneSameInstant(userJiraZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
@@ -155,14 +112,16 @@ public class JiraAgileProjectProvider implements AgileProjectProvider {
                 }
             };
             projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, lastUpdatedIssue, issues, customFieldsNames);
-            saveProjectToFile(projectData);
             startAt = startAt + maxResults;
+            if (total > 0 && startAt < total) {
+                observer.updated(projectData, (double) startAt / (double) total);
+            }
         } while (startAt < total);
         projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, ZonedDateTime.now(), new HashMap<>(projectData.getIssues()), customFieldsNames);
         return projectData;
     }
 
-    private AgileProjectData tryUpdateFromLocalJiraFiles(AgileProjectData projectData) throws IOException {
+    private AgileProjectData tryUpdateFromLocalJiraFiles(AgileProjectData projectData, AgileProjectDataObserver observer) throws IOException {
         if (projectData.getIssues().isEmpty()) {
             File[] files = getIssuesFiles(projectData.getProjectId());
             if (files.length > 0) {
@@ -181,7 +140,7 @@ public class JiraAgileProjectProvider implements AgileProjectProvider {
                 }
 
                 projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, lastUpdatedIssue, issues, customFieldsNames);
-                saveProjectToFile(projectData);
+                observer.updated(projectData, 0.0);
             }
         }
         return projectData;

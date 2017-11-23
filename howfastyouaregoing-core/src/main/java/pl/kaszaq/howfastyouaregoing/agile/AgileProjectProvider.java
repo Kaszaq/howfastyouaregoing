@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface AgileProjectProvider {
 
     Optional<AgileProject> loadProject(String projectId, AgileProjectConfiguration configuration);
-    
+    Optional<AgileProject> loadProject(String projectId, AgileProjectConfiguration configuration, AgileProjectDataObserver observer);
 }

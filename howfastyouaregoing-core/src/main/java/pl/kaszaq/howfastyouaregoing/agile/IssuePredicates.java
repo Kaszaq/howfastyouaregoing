@@ -22,6 +22,7 @@ public class IssuePredicates {
 
         return issue -> issue.getCreated().isAfter(date);
     }
+    
 
     public static Predicate<Issue> hasStatusTransitionsThat(Predicate<IssueStatusTransition>... predicates) {
         Optional<Predicate<IssueStatusTransition>> predicate
