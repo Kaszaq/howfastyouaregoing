@@ -5,9 +5,8 @@ import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
-import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
-import pl.kaszaq.howfastyouaregoing.agile.jira.JiraAgileProjectProvider;
+import pl.kaszaq.howfastyouaregoing.agile.CachingAgileProjectProvider;
 import pl.kaszaq.howfastyouaregoing.http.HttpClient;
 import pl.kaszaq.howfastyouaregoing.json.JsonNodeOptional;
 
@@ -27,10 +26,12 @@ public class JiraAgileProjectProviderBuilderFactory {
         private String jsessionId;
         private String username;
         private String password;
+        private String encryptionPassword = null;
         private File cacheDir;
         private String jiraUrl;
         private int minutesUntilUpdate = 15;
         private Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers = Collections.emptyMap();
+        private boolean cacheOnly;
 
         private JiraAgileProjectProviderBuilder(String username, String password) {
             this.username = username;
@@ -51,6 +52,16 @@ public class JiraAgileProjectProviderBuilderFactory {
 
         public JiraAgileProjectProviderBuilder withCacheDir(File cacheDir) {
             this.cacheDir = cacheDir;
+            return this;
+        }
+        
+        public JiraAgileProjectProviderBuilder withCacheOnly(boolean cacheOnly) {
+            this.cacheOnly = cacheOnly;
+            return this;
+        }
+        
+         public JiraAgileProjectProviderBuilder withCacheEncryption(String encryptionPassword) {
+            this.encryptionPassword = encryptionPassword;
             return this;
         }
 
@@ -80,12 +91,11 @@ public class JiraAgileProjectProviderBuilderFactory {
             if (cacheDir == null) {
                 cacheDir = new File("cache/");
             }
-            File jiraCacheDirectory = new File(cacheDir, "jira/");
-            File jiraCacheIssuesDirectory = new File(jiraCacheDirectory, "issues/");
-            jiraCacheDirectory.mkdirs();
+            File jiraCacheIssuesDirectory = new File(cacheDir, "jira/issues/");
             jiraCacheIssuesDirectory.mkdirs();
             String jiraSearchUrl = jiraUrl + "/rest/api/2/search";
-            return new JiraAgileProjectProvider(client, jiraCacheDirectory, jiraCacheIssuesDirectory, jiraSearchUrl, customFieldsParsers, minutesUntilUpdate);
+            JiraAgileProjectDataReader reader = new JiraAgileProjectDataReader(client, jiraCacheIssuesDirectory, jiraSearchUrl, customFieldsParsers, minutesUntilUpdate);
+            return new CachingAgileProjectProvider(cacheDir, customFieldsParsers.keySet(), reader, cacheOnly);
         }
 
     }
