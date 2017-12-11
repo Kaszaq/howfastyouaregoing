@@ -2,6 +2,7 @@ package pl.kaszaq.howfastyouaregoing.agile;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -21,6 +22,10 @@ public class AgileProject {
 
     public Issue getIssue(String issueId) {
         return data.get(issueId);
+    }
+    
+    public List<String> calculateProbableStatusOrder() {
+        return StatusOrderCalculator.getStatusOrder(getAllIssues());
     }
 
     public boolean contains(Issue issue) {
