@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import pl.kaszaq.howfastyouaregoing.agile.CachingAgileProjectProvider;
 import pl.kaszaq.howfastyouaregoing.http.HttpClient;
 import pl.kaszaq.howfastyouaregoing.json.JsonNodeOptional;
+import pl.kaszaq.howfastyouaregoing.storage.DefaultFileStorage;
+import pl.kaszaq.howfastyouaregoing.storage.FileStorage;
 
 @Slf4j
 public class JiraAgileProjectProviderBuilderFactory {
@@ -26,7 +28,7 @@ public class JiraAgileProjectProviderBuilderFactory {
         private String jsessionId;
         private String username;
         private String password;
-        private String encryptionPassword = null;
+        private FileStorage fileStorage;
         private File cacheDir;
         private String jiraUrl;
         private int minutesUntilUpdate = 15;
@@ -60,8 +62,8 @@ public class JiraAgileProjectProviderBuilderFactory {
             return this;
         }
         
-         public JiraAgileProjectProviderBuilder withCacheEncryption(String encryptionPassword) {
-            this.encryptionPassword = encryptionPassword;
+         public JiraAgileProjectProviderBuilder withFileStorage(FileStorage fileStorage) {
+            this.fileStorage = fileStorage;
             return this;
         }
 
@@ -94,8 +96,12 @@ public class JiraAgileProjectProviderBuilderFactory {
             File jiraCacheIssuesDirectory = new File(cacheDir, "jira/issues/");
             jiraCacheIssuesDirectory.mkdirs();
             String jiraSearchUrl = jiraUrl + "/rest/api/2/search";
-            JiraAgileProjectDataReader reader = new JiraAgileProjectDataReader(client, jiraCacheIssuesDirectory, jiraSearchUrl, customFieldsParsers, minutesUntilUpdate);
-            return new CachingAgileProjectProvider(cacheDir, customFieldsParsers.keySet(), reader, cacheOnly);
+            if(fileStorage==null){
+                fileStorage = new DefaultFileStorage();
+            }
+            JiraAgileProjectDataReader reader = new JiraAgileProjectDataReader(client, jiraCacheIssuesDirectory, 
+                    jiraSearchUrl, customFieldsParsers, minutesUntilUpdate, fileStorage);
+            return new CachingAgileProjectProvider(cacheDir, customFieldsParsers.keySet(), reader, cacheOnly, fileStorage);
         }
 
     }

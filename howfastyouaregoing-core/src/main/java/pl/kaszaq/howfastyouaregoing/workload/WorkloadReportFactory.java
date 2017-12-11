@@ -58,7 +58,7 @@ public class WorkloadReportFactory {
         return workloadReport;
 
     }
-
+// TODO: refactor asap to move away this filter from here
     private List<Issue> getValidIssues(String projectId) {
         return agileClient.getAgileProject(projectId).getAllIssues().stream()
                 .filter(

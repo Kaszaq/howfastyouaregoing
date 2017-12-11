@@ -29,6 +29,7 @@ import pl.kaszaq.howfastyouaregoing.Config;
 import static pl.kaszaq.howfastyouaregoing.Config.OBJECT_MAPPER;
 import pl.kaszaq.howfastyouaregoing.agile.jira.AgileProjectDataReader;
 import pl.kaszaq.howfastyouaregoing.agile.pojo.AgileProjectData;
+import pl.kaszaq.howfastyouaregoing.storage.FileStorage;
 
 @Slf4j
 public class CachingAgileProjectProvider implements AgileProjectProvider {
@@ -39,16 +40,19 @@ public class CachingAgileProjectProvider implements AgileProjectProvider {
     private final Set<String> customFieldsNames;
     private final AgileProjectDataReader agileProjectDataReader;
     private final boolean cacheOnly;
+    private final FileStorage fileStorage;
 
     public CachingAgileProjectProvider(
             File cacheDirectory,
             Set<String> customFieldsNames,
             AgileProjectDataReader agileProjectDataReader,
-    Boolean cacheOnly) {
+            Boolean cacheOnly,
+            FileStorage fileStorage) {
         this.cacheDirectory = cacheDirectory;
         this.customFieldsNames = new HashSet<>(customFieldsNames);
         this.agileProjectDataReader = agileProjectDataReader;
-        this.cacheOnly =cacheOnly;
+        this.cacheOnly = cacheOnly;
+        this.fileStorage = fileStorage;
     }
 
     @Override
@@ -87,7 +91,7 @@ public class CachingAgileProjectProvider implements AgileProjectProvider {
     private Optional<AgileProjectData> loadProjectFromFile(String projectId) throws IOException {
         File projectFile = getProjectFile(projectId);
         if (projectFile.exists()) {
-            return Optional.of(OBJECT_MAPPER.readValue(projectFile, AgileProjectData.class));
+            return Optional.of(OBJECT_MAPPER.readValue(fileStorage.loadFile(projectFile), AgileProjectData.class));
         } else {
             return Optional.empty();
         }
@@ -100,7 +104,7 @@ public class CachingAgileProjectProvider implements AgileProjectProvider {
     private void saveProjectToFile(AgileProjectData project) {
         try {
             File projectFile = getProjectFile(project.getProjectId());
-            OBJECT_MAPPER.writeValue(projectFile, project);
+            fileStorage.storeFile(projectFile, OBJECT_MAPPER.writeValueAsString(project));
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }

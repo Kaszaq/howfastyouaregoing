@@ -20,6 +20,7 @@ import pl.kaszaq.howfastyouaregoing.http.HttpClient;
 import pl.kaszaq.howfastyouaregoing.json.JsonNodeOptional;
 import pl.kaszaq.howfastyouaregoing.agile.AgileProjectDataObserver;
 import pl.kaszaq.howfastyouaregoing.agile.IssueData;
+import pl.kaszaq.howfastyouaregoing.storage.FileStorage;
 
 @Slf4j
 public class JiraAgileProjectDataReader implements AgileProjectDataReader {
@@ -30,13 +31,15 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
     private final String jiraSearchEndpoint;
     private final Set<String> customFieldsNames;
     private final int minutesUntilUpdate;
+    private final FileStorage fileStorage;
 
     JiraAgileProjectDataReader(
             HttpClient client,
             File jiraCacheIssuesDirectory,
             String jiraSearchEndpoint,
             Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers,
-            int minutesUntilUpdate) {
+            int minutesUntilUpdate,
+            FileStorage fileStorage) {
         this.jiraCacheIssuesDirectory = jiraCacheIssuesDirectory;
         this.jiraSearchEndpoint = jiraSearchEndpoint;
         // todo: it should be possible to close this client
@@ -44,6 +47,7 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
         this.issueParser = new JiraIssueParser(customFieldsParsers);
         this.customFieldsNames = new HashSet<>(customFieldsParsers.keySet());
         this.minutesUntilUpdate = minutesUntilUpdate;
+        this.fileStorage = fileStorage;
     }
 
     @Override
@@ -106,7 +110,7 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
                 }
                 issues.put(issueData.getKey(), issueData);
                 try {
-                    OBJECT_MAPPER.writeValue(getIssueFile(issueData.getKey()), node);
+                    fileStorage.storeFile(getIssueFile(issueData.getKey()), OBJECT_MAPPER.writeValueAsString(node));
                 } catch (IOException ex) {
                     LOG.warn("Unable to store vanila jira issue data. Issue id: {}", issueData.getKey(), ex);
                 }
@@ -132,7 +136,8 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
                 ZonedDateTime lastUpdatedIssue = projectData.getLastUpdatedIssue();
                 Map<String, IssueData> issues = new HashMap<>(projectData.getIssues());
                 for (File file : files) {
-                    IssueData issueData = issueParser.parseJiraIssue(OBJECT_MAPPER.readTree(file));
+
+                    IssueData issueData = issueParser.parseJiraIssue(OBJECT_MAPPER.readTree(fileStorage.loadFile(file)));
                     if (issueData.getUpdated().isAfter(lastUpdatedIssue)) {
                         lastUpdatedIssue = issueData.getUpdated();
                     }
