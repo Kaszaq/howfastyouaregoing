@@ -18,7 +18,6 @@ public class CustomFieldsExample {
     private static AgileClient agileClient;
 
     public static void main(String[] args) {
-        Config.cacheOnly = true;
         runExample();
     }
 
@@ -27,6 +26,7 @@ public class CustomFieldsExample {
                 .withJsession("cookievalue")
                 .withCacheDir(new File("src/main/resources/cache/"))
                 .withJiraUrl("http://localhost:8080/")
+                .withCacheOnly(true)
                 .withCustomFieldsParsers(ImmutableMap.of(
                         "estimatedIssueSize", fieldsNode -> fieldsNode.get("customfield_12345").asInt()
                 ))
