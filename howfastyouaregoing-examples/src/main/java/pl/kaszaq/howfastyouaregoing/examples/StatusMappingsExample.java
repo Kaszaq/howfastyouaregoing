@@ -23,7 +23,6 @@ public class StatusMappingsExample {
     private static final String sessionCookieValue = "";
 
     public static void main(String[] args) {
-        Config.cacheOnly = true;
         runExample();
     }
 
@@ -43,6 +42,7 @@ public class StatusMappingsExample {
         AgileProjectProvider agileProjectProvider = JiraAgileProjectProviderBuilderFactory
                 .withJsession("cookievalue")
                 .withCacheDir(new File("src/main/resources/cache/"))
+                .withCacheOnly(true)
                 .withJiraUrl("http://localhost:8080/").build();
         return AgileClientFactory.newClient()
                 .withAgileProjectProvider(agileProjectProvider)
@@ -53,6 +53,7 @@ public class StatusMappingsExample {
         AgileProjectProvider agileProjectProvider = JiraAgileProjectProviderBuilderFactory
                 .withJsession("cookievalue")
                 .withCacheDir(new File("src/main/resources/cache/"))
+                .withCacheOnly(true)
                 .withJiraUrl("http://localhost:8080/")
                 .build();
         return AgileClientFactory.newClient()
