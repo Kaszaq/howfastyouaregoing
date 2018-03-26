@@ -1,31 +1,32 @@
 package pl.kaszaq.howfastyouaregoing.agile;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import lombok.Getter;
 
 public class AgileProject {
 
     private final Map<String, Issue> data;
     private final String id;
+    @Getter(lazy = true)
+    private final LocalDateTime firstIssueCreateDate = calculateFirstIssueCreateDate();
+    @Getter(lazy = true)
+    private final List<String> probableStatusOrder = calculateProbableStatusOrder();
+    @Getter(lazy = true)
+    private final Collection<Issue> allIssues = calculateAllIssues();
 
     AgileProject(String id, Map<String, Issue> data) {
         this.id = id;
         this.data = new HashMap<>(data);
     }
 
-    public Collection<Issue> getAllIssues() {
-        return new HashMap<>(data).values();
-    }
-
     public Issue getIssue(String issueId) {
         return data.get(issueId);
-    }
-    
-    public List<String> calculateProbableStatusOrder() {
-        return StatusOrderCalculator.getStatusOrder(getAllIssues());
     }
 
     public boolean contains(Issue issue) {
@@ -34,6 +35,18 @@ public class AgileProject {
 
     public boolean contains(String issueKey) {
         return data.containsKey(issueKey);
+    }
+
+    public Collection<Issue> calculateAllIssues() {
+        return Collections.unmodifiableCollection(data.values());
+    }
+
+    private List<String> calculateProbableStatusOrder() {
+        return StatusOrderCalculator.getStatusOrder(getAllIssues());
+    }
+
+    private LocalDateTime calculateFirstIssueCreateDate() {
+        return getAllIssues().stream().map(i -> i.getCreated().toLocalDateTime()).min((o1, o2) -> o1.compareTo(o2)).orElse(null);
     }
 
     @Override
@@ -60,5 +73,4 @@ public class AgileProject {
         }
         return true;
     }
-
 }

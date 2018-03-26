@@ -131,6 +131,11 @@ public class Issue {
     }
 
     @Override
+    public String toString() {
+        return this.getPrettyName();
+    }
+
+    @Override
     public int hashCode() {
         int hash = 7;
         hash = 53 * hash + Objects.hashCode(this.issueData);

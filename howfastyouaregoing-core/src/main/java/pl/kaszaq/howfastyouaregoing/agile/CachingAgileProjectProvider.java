@@ -91,7 +91,12 @@ public class CachingAgileProjectProvider implements AgileProjectProvider {
     private Optional<AgileProjectData> loadProjectFromFile(String projectId) throws IOException {
         File projectFile = getProjectFile(projectId);
         if (projectFile.exists()) {
-            return Optional.of(OBJECT_MAPPER.readValue(fileStorage.loadFile(projectFile), AgileProjectData.class));
+            try {
+                return Optional.of(OBJECT_MAPPER.readValue(fileStorage.loadFile(projectFile), AgileProjectData.class));
+            } catch (Throwable ex) {
+                LOG.warn("Problem while reading project {} from file" + projectId, ex);
+                return Optional.empty();
+            }
         } else {
             return Optional.empty();
         }
