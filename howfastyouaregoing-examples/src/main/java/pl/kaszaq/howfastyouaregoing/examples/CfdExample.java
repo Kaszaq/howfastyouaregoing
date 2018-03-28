@@ -23,7 +23,7 @@ public class CfdExample {
         CfdData data = CfdDataComputer.calculateCfdData(project, alwaysTrue());
 
         Map<String, Integer> statusValues = new HashMap<>();
-        List<String> statusOrder = data.getDailyTransitions().values().stream().flatMap(tr -> tr.getStatusChanges().keySet().stream()).distinct().filter(s -> s != null).collect(Collectors.toList());
+        List<String> statusOrder = project.getProbableStatusOrder();
         statusOrder.forEach(status -> statusValues.put(status, 0));
         statusOrder.stream().map(o -> "\t" + o).forEach(System.out::print);
         System.out.println("");

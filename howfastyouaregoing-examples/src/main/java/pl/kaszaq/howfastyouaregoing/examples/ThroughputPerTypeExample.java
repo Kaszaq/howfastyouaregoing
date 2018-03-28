@@ -3,7 +3,6 @@ package pl.kaszaq.howfastyouaregoing.examples;
 import static java.time.DayOfWeek.MONDAY;
 import java.time.LocalDate;
 import static java.time.temporal.TemporalAdjusters.previousOrSame;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
