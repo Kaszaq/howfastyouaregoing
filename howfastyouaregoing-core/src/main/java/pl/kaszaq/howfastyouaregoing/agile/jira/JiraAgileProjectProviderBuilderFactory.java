@@ -95,12 +95,11 @@ public class JiraAgileProjectProviderBuilderFactory {
             }
             File jiraCacheIssuesDirectory = new File(cacheDir, "jira/issues/");
             jiraCacheIssuesDirectory.mkdirs();
-            String jiraSearchUrl = jiraUrl + "/rest/api/2/search";
             if(fileStorage==null){
                 fileStorage = new DefaultFileStorage();
             }
             JiraAgileProjectDataReader reader = new JiraAgileProjectDataReader(client, jiraCacheIssuesDirectory, 
-                    jiraSearchUrl, customFieldsParsers, minutesUntilUpdate, fileStorage);
+                    jiraUrl, customFieldsParsers, minutesUntilUpdate, fileStorage);
             return new CachingAgileProjectProvider(cacheDir, customFieldsParsers.keySet(), reader, cacheOnly, fileStorage);
         }
 

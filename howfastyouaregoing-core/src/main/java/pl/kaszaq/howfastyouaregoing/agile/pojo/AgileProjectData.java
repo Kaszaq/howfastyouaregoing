@@ -13,5 +13,5 @@ public class AgileProjectData {
     ZonedDateTime lastUpdated;
     Map<String, IssueData> issues;
     Set<String> customFieldsNames;
-
+    AgileProjectStatuses statuses;
 }
