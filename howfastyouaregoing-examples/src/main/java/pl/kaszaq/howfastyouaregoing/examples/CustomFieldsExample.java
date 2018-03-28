@@ -2,9 +2,9 @@ package pl.kaszaq.howfastyouaregoing.examples;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
-import pl.kaszaq.howfastyouaregoing.Config;
 import pl.kaszaq.howfastyouaregoing.agile.AgileClient;
 import pl.kaszaq.howfastyouaregoing.agile.AgileClientFactory;
+import pl.kaszaq.howfastyouaregoing.agile.AgileProject;
 import pl.kaszaq.howfastyouaregoing.agile.AgileProjectProvider;
 import pl.kaszaq.howfastyouaregoing.agile.jira.JiraAgileProjectProviderBuilderFactory;
 
@@ -41,6 +41,10 @@ public class CustomFieldsExample {
     }
 
     private static double getAverageSize(final String projectId) {
-        return agileClient.getAgileProject(projectId).getAllIssues().stream().mapToInt(issue -> (Integer) issue.getCustomFields().get("estimatedIssueSize")).average().getAsDouble();
+        final AgileProject agileProject = agileClient.getAgileProject(projectId);
+        return agileProject.getAllIssues().stream()
+                .mapToInt(issue -> (Integer) issue.getCustomFields().get("estimatedIssueSize"))
+                .average()
+                .getAsDouble();
     }
 }

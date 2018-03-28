@@ -65,7 +65,7 @@ public class CachingAgileProjectProvider implements AgileProjectProvider {
         try {
             Optional<AgileProjectData> projectDataOptional = loadProjectFromFile(projectId);
             AgileProjectData projectData = projectDataOptional.orElse(createNewEmptyProject(projectId));
-            if (!customFieldsNames.containsAll(projectData.getCustomFieldsNames())) {
+            if (!projectData.getCustomFieldsNames().containsAll(customFieldsNames)) {
                 LOG.info("Noticied different setup of custom fields. Forcing to recreate project.");
                 projectData = createNewEmptyProject(projectId);
             }
