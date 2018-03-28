@@ -65,7 +65,7 @@ public class CachingAgileProjectProvider implements AgileProjectProvider {
         try {
             Optional<AgileProjectData> projectDataOptional = loadProjectFromFile(projectId);
             AgileProjectData projectData = projectDataOptional.orElse(createNewEmptyProject(projectId));
-            if (!customFieldsNames.equals(projectData.getCustomFieldsNames())) {
+            if (!customFieldsNames.containsAll(projectData.getCustomFieldsNames())) {
                 LOG.info("Noticied different setup of custom fields. Forcing to recreate project.");
                 projectData = createNewEmptyProject(projectId);
             }
@@ -85,7 +85,7 @@ public class CachingAgileProjectProvider implements AgileProjectProvider {
     }
 
     private AgileProjectData createNewEmptyProject(String projectId) {
-        return new AgileProjectData(projectId, INITIAL_DATE, INITIAL_DATE, new HashMap<>(), customFieldsNames);
+        return new AgileProjectData(projectId, INITIAL_DATE, INITIAL_DATE, new HashMap<>(), customFieldsNames, null);
     }
 
     private Optional<AgileProjectData> loadProjectFromFile(String projectId) throws IOException {

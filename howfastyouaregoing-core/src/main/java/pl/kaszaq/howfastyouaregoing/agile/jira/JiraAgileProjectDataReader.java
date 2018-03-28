@@ -19,6 +19,7 @@ import pl.kaszaq.howfastyouaregoing.agile.pojo.AgileProjectData;
 import pl.kaszaq.howfastyouaregoing.http.HttpClient;
 import pl.kaszaq.howfastyouaregoing.json.JsonNodeOptional;
 import pl.kaszaq.howfastyouaregoing.agile.AgileProjectDataObserver;
+import pl.kaszaq.howfastyouaregoing.agile.pojo.AgileProjectStatuses;
 import pl.kaszaq.howfastyouaregoing.agile.IssueData;
 import pl.kaszaq.howfastyouaregoing.storage.FileStorage;
 
@@ -32,22 +33,24 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
     private final Set<String> customFieldsNames;
     private final int minutesUntilUpdate;
     private final FileStorage fileStorage;
+    private final JiraProjectStatusReader statusReader;
 
     JiraAgileProjectDataReader(
             HttpClient client,
             File jiraCacheIssuesDirectory,
-            String jiraSearchEndpoint,
+            String jiraUrl,
             Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers,
             int minutesUntilUpdate,
             FileStorage fileStorage) {
         this.jiraCacheIssuesDirectory = jiraCacheIssuesDirectory;
-        this.jiraSearchEndpoint = jiraSearchEndpoint;
+        this.jiraSearchEndpoint = jiraUrl + "/rest/api/2/search";
         // todo: it should be possible to close this client
         this.httpClient = client;
         this.issueParser = new JiraIssueParser(customFieldsParsers);
         this.customFieldsNames = new HashSet<>(customFieldsParsers.keySet());
         this.minutesUntilUpdate = minutesUntilUpdate;
         this.fileStorage = fileStorage;
+        statusReader = new JiraProjectStatusReader(httpClient, jiraUrl, jiraCacheIssuesDirectory, fileStorage);
     }
 
     @Override
@@ -71,7 +74,7 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
     }
 
     private File[] getIssuesFiles(String projectId) {
-        return jiraCacheIssuesDirectory.listFiles((File dir1, String name) -> name.startsWith(projectId + "-"));
+        return jiraCacheIssuesDirectory.listFiles((File dir1, String name) -> name.matches(projectId+"-\\d+\\.json"));
 
     }
 
@@ -79,7 +82,7 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
         // TODO: the time zone should be taken from user configuration on jira side.
         ZoneId userJiraZoneId = ZoneId.systemDefault();
         String lastUpdatedQueryValue = projectData.getLastUpdatedIssue().withZoneSameInstant(userJiraZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-
+        AgileProjectStatuses newStatuses = statusReader.getProjectStatuses("AAS", false);
         int maxResults = 50;
         int startAt = 0;
         int total = 0;
@@ -115,13 +118,13 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
                     LOG.warn("Unable to store vanila jira issue data. Issue id: {}", issueData.getKey(), ex);
                 }
             };
-            projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, lastUpdatedIssue, issues, customFieldsNames);
+            projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, lastUpdatedIssue, issues, customFieldsNames, newStatuses);
             startAt = startAt + maxResults;
             if (total > 0 && startAt < total) {
                 observer.updated(projectData, (double) startAt / (double) total);
             }
         } while (startAt < total);
-        projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, ZonedDateTime.now(), new HashMap<>(projectData.getIssues()), customFieldsNames);
+        projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, ZonedDateTime.now(), new HashMap<>(projectData.getIssues()), customFieldsNames, newStatuses);
         return projectData;
     }
 
@@ -129,10 +132,16 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
         if (projectData.getIssues().isEmpty()) {
             File[] files = getIssuesFiles(projectData.getProjectId());
             if (files.length > 0) {
+                AgileProjectStatuses statuses = null;
+                if (statusReader.areStatusesCached(projectData.getProjectId())) {
+                    statuses = statusReader.getProjectStatuses(projectData.getProjectId(), true);
+                }
+
                 LOG.info("Project was empty but there were files from jira found in cache. "
                         + "Will try to create project from them before attempting to connect to jira. "
                         + "If this behavior was not expected and you need to read all files freshly from jira, "
                         + "you have to remove all cached files, not only project file.");
+
                 ZonedDateTime lastUpdatedIssue = projectData.getLastUpdatedIssue();
                 Map<String, IssueData> issues = new HashMap<>(projectData.getIssues());
                 for (File file : files) {
@@ -143,8 +152,7 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
                     }
                     issues.put(issueData.getKey(), issueData);
                 }
-
-                projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, lastUpdatedIssue, issues, customFieldsNames);
+                projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, lastUpdatedIssue, issues, customFieldsNames, statuses);
                 observer.updated(projectData, 0.0);
             }
         }
