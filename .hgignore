@@ -5,3 +5,4 @@ nb-configuration.xml
 dependency-reduced-pom.xml
 nbactions.xml
 .idea/
+howfastyouaregoing-examples/src/main/resources/cache/*

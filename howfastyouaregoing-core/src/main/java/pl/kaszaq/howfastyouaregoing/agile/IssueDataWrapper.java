@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
@@ -22,42 +20,12 @@ class IssueDataWrapper {
 
     @Getter(lazy = true)
     private final Map<String, Duration> timeInStatus = calculateTimeInStatus();
-    @Getter(lazy = true)
-    private final Map<String, Duration> workTimeInStatus = calculateWorkTimeInStatus();
 
     @Getter(lazy = true)
     private final Set<LocalDate> allDayBlockedDays = calculateDatesWhenAllDayBlocked();
-    private final Map<String, SortedSet<LocalDate>> datesInStatus = new HashMap<>();
 
     public Duration getDurationInStatuses(String... statuses) {
         return Stream.of(statuses).map(status -> getTimeInStatus().getOrDefault(status, Duration.ZERO)).reduce(Duration::plus).get();
-    }
-
-    public boolean isStatusOnDay(LocalDate date, Set<String> statuses) {
-        return statuses.stream().anyMatch((status) -> (getDatesInStatus(status).contains(date)));
-    }
-
-    private SortedSet<LocalDate> getDatesInStatus(String status) {
-        return datesInStatus.computeIfAbsent(status, s -> calculateDatesInStatus(s));
-    }
-
-    private SortedSet<LocalDate> calculateDatesInStatus(String requiredStatus) {
-        TreeSet<LocalDate> datesInCurrentStatus = new TreeSet<>();
-        ZonedDateTime temp = null;
-        for (IssueStatusTransition issueStatusTransition : issue.getIssueStatusTransitions()) {
-            if (temp != null) {
-                datesInCurrentStatus.addAll(DateUtils.getCollectionOfLocalDates(temp, issueStatusTransition.getDate()));
-                temp = null;
-            }
-            if (requiredStatus.equals(issueStatusTransition.getToStatus())) {
-                temp = issueStatusTransition.getDate();
-            }
-        }
-        if (temp != null) {
-            datesInCurrentStatus.addAll(DateUtils.getCollectionOfLocalDates(temp, ZonedDateTime.now()));
-        }
-
-        return datesInCurrentStatus;
     }
 
     private Set<LocalDate> calculateDatesWhenAllDayBlocked() {
@@ -80,10 +48,6 @@ class IssueDataWrapper {
         return blockedDays;
     }
 
-    private Duration calculateWorkTimeInStatus(IssueData issue, String status) {
-        return calculateTimeInStatus(issue, status, IssueDataWrapper::calculateDurationBetweenInWorkingHours);
-    }
-
     private Duration calculateTotalTimeInStatus(IssueData issue, String status) {
         return calculateTimeInStatus(issue, status, (from, to) -> Duration.between(from, to));
     }
@@ -93,10 +57,6 @@ class IssueDataWrapper {
         Duration duration = Duration.ZERO;
         for (IssueStatusTransition issueStatusTransition : issue.getIssueStatusTransitions()) {
             if (temp != null) {
-                if (issueStatusTransition.getDate() == null) {
-                    //TODO: what is that?...
-                    System.out.println("aaaa");
-                }
                 duration = duration.plus(durationFunction.apply(temp, issueStatusTransition.getDate()));
                 temp = null;
             }
@@ -108,19 +68,6 @@ class IssueDataWrapper {
             duration = duration.plus(durationFunction.apply(temp, ZonedDateTime.now()));
         }
         return duration;
-    }
-
-    private static Duration calculateDurationBetweenInWorkingHours(ZonedDateTime from, ZonedDateTime to) {
-        Duration duration = Duration.between(from, to);
-        duration = duration.minusHours(duration.toDays() * 16);
-        return duration;
-    }
-
-    private Map<String, Duration> calculateWorkTimeInStatus() {
-        return issue.getIssueStatusTransitions().stream().map(t -> t.getToStatus()).distinct().collect(
-                () -> new HashMap<>(),
-                (map, status) -> map.put(status, calculateWorkTimeInStatus(issue, status)),
-                Map::putAll);
     }
 
     private Map<String, Duration> calculateTimeInStatus() {

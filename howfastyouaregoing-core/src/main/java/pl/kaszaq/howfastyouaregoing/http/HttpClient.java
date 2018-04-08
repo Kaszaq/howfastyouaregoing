@@ -25,6 +25,7 @@ public class HttpClient implements AutoCloseable {
 
     public HttpClient(String jsessionId) {
         httpClient = HttpClients.custom()
+                .useSystemProperties()
                 .setDefaultHeaders(Lists.newArrayList(
                         new BasicHeader("Cookie", "JSESSIONID=" + jsessionId)))
                 .build();
@@ -33,6 +34,7 @@ public class HttpClient implements AutoCloseable {
     public HttpClient(String username, String password) {
         String encodedCredentials = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
         httpClient = HttpClients.custom()
+                .useSystemProperties()
                 .setDefaultHeaders(Lists.newArrayList(
                         new BasicHeader("Authorization", "Basic " + encodedCredentials)))
                 .build();
