@@ -32,30 +32,32 @@ public class JiraProjectStatusReader {
     private final String jiraUrl;
     private final File jiraCacheIssuesDirectory;
 
+    private final boolean cacheRawJiraFiles;
     private final FileStorage fileStorage;
 
-    public JiraProjectStatusReader(HttpClient httpClient, String jiraUrl, File jiraCacheIssuesDirectory, FileStorage fileStorage) {
+    public JiraProjectStatusReader(HttpClient httpClient, String jiraUrl, File jiraCacheIssuesDirectory, FileStorage fileStorage, boolean cacheRawJiraFiles) {
         this.httpClient = httpClient;
         this.jiraUrl = jiraUrl;
         this.jiraCacheIssuesDirectory = jiraCacheIssuesDirectory;
         this.fileStorage = fileStorage;
+        this.cacheRawJiraFiles = cacheRawJiraFiles;
     }
-
- 
 
     boolean areStatusesCached(String projectKey) {
-        return new File(jiraCacheIssuesDirectory, projectKey + "-STATUSES" + ".json").exists();
+        return cacheRawJiraFiles && new File(jiraCacheIssuesDirectory, projectKey + "-STATUSES" + ".json").exists();
     }
 
-    AgileProjectStatuses getProjectStatuses(String projectKey, boolean cache) throws IOException {
+    AgileProjectStatuses getProjectStatuses(String projectKey, boolean readFromCache) throws IOException {
         String url = jiraUrl + "/rest/api/2/project/" + projectKey + "/statuses";
         File file = new File(jiraCacheIssuesDirectory, projectKey + "-STATUSES" + ".json");
         String response;
-        if (cache) {
+        if (readFromCache) { // to do this cacheRawJiraFiles is stupid. So in this methods I can call it to read from local even though cacheRawJiraFiles is set to false
             response = fileStorage.loadFile(file);
         } else {
             response = httpClient.get(url);
-            fileStorage.storeFile(file, response);
+            if (cacheRawJiraFiles) {
+                fileStorage.storeFile(file, response);
+            }
         }
 
         Set<String> indeterminateStatuses = new HashSet<>();

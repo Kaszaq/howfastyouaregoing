@@ -34,6 +34,8 @@ public class JiraAgileProjectProviderBuilderFactory {
         private int minutesUntilUpdate = 15;
         private Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers = Collections.emptyMap();
         private boolean cacheOnly;
+        private boolean emptyDescriptionAndSummary = false;
+        private boolean cacheRawJiraFiles = true;
 
         private JiraAgileProjectProviderBuilder(String username, String password) {
             this.username = username;
@@ -56,13 +58,13 @@ public class JiraAgileProjectProviderBuilderFactory {
             this.cacheDir = cacheDir;
             return this;
         }
-        
+
         public JiraAgileProjectProviderBuilder withCacheOnly(boolean cacheOnly) {
             this.cacheOnly = cacheOnly;
             return this;
         }
-        
-         public JiraAgileProjectProviderBuilder withFileStorage(FileStorage fileStorage) {
+
+        public JiraAgileProjectProviderBuilder withFileStorage(FileStorage fileStorage) {
             this.fileStorage = fileStorage;
             return this;
         }
@@ -83,6 +85,16 @@ public class JiraAgileProjectProviderBuilderFactory {
             return this;
         }
 
+        public JiraAgileProjectProviderBuilder withEmptyDescriptionAndSummary(boolean emptyDescriptionAndSummary) {
+            this.emptyDescriptionAndSummary = emptyDescriptionAndSummary;
+            return this;
+        }
+
+        public JiraAgileProjectProviderBuilder withCacheRawJiraFiles(boolean cacheRawJiraFiles) {
+            this.cacheRawJiraFiles = cacheRawJiraFiles;
+            return this;
+        }
+
         public AgileProjectProvider build() {
             HttpClient client;
             if (jsessionId != null) {
@@ -95,11 +107,11 @@ public class JiraAgileProjectProviderBuilderFactory {
             }
             File jiraCacheIssuesDirectory = new File(cacheDir, "jira/issues/");
             jiraCacheIssuesDirectory.mkdirs();
-            if(fileStorage==null){
+            if (fileStorage == null) {
                 fileStorage = new DefaultFileStorage();
             }
-            JiraAgileProjectDataReader reader = new JiraAgileProjectDataReader(client, jiraCacheIssuesDirectory, 
-                    jiraUrl, customFieldsParsers, minutesUntilUpdate, fileStorage);
+            JiraAgileProjectDataReader reader = new JiraAgileProjectDataReader(client, jiraCacheIssuesDirectory,
+                    jiraUrl, customFieldsParsers, minutesUntilUpdate, fileStorage, emptyDescriptionAndSummary, cacheRawJiraFiles);
             return new CachingAgileProjectProvider(cacheDir, customFieldsParsers.keySet(), reader, cacheOnly, fileStorage);
         }
 

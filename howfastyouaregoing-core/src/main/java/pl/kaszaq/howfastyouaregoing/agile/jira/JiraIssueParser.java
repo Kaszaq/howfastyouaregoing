@@ -24,12 +24,12 @@ class JiraIssueParser {
 
     private final Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers;
 
-    IssueData parseJiraIssue(String jsonIssue) throws IOException {
+    IssueData parseJiraIssue(String jsonIssue, boolean emptyDescriptionAndSummary) throws IOException {
         JsonNode node = OBJECT_MAPPER.readTree(jsonIssue);
-        return parseJiraIssue(node);
+        return parseJiraIssue(node, emptyDescriptionAndSummary);
     }
 
-    IssueData parseJiraIssue(JsonNode node) {
+    IssueData parseJiraIssue(JsonNode node, boolean emptyDescriptionAndSummary) {
         JsonNodeOptional issueNode = JsonNodeOptional.of(node);
 
         String key = issueNode.get("key").asText();
@@ -40,9 +40,16 @@ class JiraIssueParser {
         ZonedDateTime created = parseDate(fieldsNode.get("created").asText());
         ZonedDateTime updated = parseDate(fieldsNode.get("updated").asText());
         String status = fieldsNode.get("status").get("name").asText();
-        String summary = fieldsNode.get("summary").asText();
-        String description = fieldsNode.get("description").asText();
 
+        String summary;
+        String description;
+        if (emptyDescriptionAndSummary) {
+            summary = "";
+            description = "";
+        } else {
+            summary = fieldsNode.get("summary").asText();
+            description = fieldsNode.get("description").asText();
+        }
         TreeSet<IssueStatusTransition> issueStatusTransitions = getIssueStatusTransitions(issueNode, status, creator, created);
         TreeSet<IssueBlockedTransition> issueBlockedTransitions = getIssueBlockedTransitions(issueNode, status, creator, created);
 

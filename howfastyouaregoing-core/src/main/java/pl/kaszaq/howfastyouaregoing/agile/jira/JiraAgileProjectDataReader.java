@@ -34,6 +34,8 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
     private final int minutesUntilUpdate;
     private final FileStorage fileStorage;
     private final JiraProjectStatusReader statusReader;
+    private final boolean emptyDescriptionAndSummary;
+    private final boolean cacheRawJiraFiles;
 
     JiraAgileProjectDataReader(
             HttpClient client,
@@ -41,7 +43,9 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
             String jiraUrl,
             Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers,
             int minutesUntilUpdate,
-            FileStorage fileStorage) {
+            FileStorage fileStorage,
+            boolean emptyDescriptionAndSummary,
+            boolean cacheRawJiraFiles) {
         this.jiraCacheIssuesDirectory = jiraCacheIssuesDirectory;
         this.jiraSearchEndpoint = jiraUrl + "/rest/api/2/search";
         // todo: it should be possible to close this client
@@ -50,13 +54,17 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
         this.customFieldsNames = new HashSet<>(customFieldsParsers.keySet());
         this.minutesUntilUpdate = minutesUntilUpdate;
         this.fileStorage = fileStorage;
-        statusReader = new JiraProjectStatusReader(httpClient, jiraUrl, jiraCacheIssuesDirectory, fileStorage);
+        statusReader = new JiraProjectStatusReader(httpClient, jiraUrl, jiraCacheIssuesDirectory, fileStorage, cacheRawJiraFiles);
+        this.emptyDescriptionAndSummary = emptyDescriptionAndSummary;
+        this.cacheRawJiraFiles = cacheRawJiraFiles;
     }
 
     @Override
     public AgileProjectData updateProject(AgileProjectData projectData, AgileProjectDataObserver observer, boolean cacheOnly) throws IOException {
         if (requiresUpdate(projectData)) {
-            projectData = tryUpdateFromLocalJiraFiles(projectData, observer);
+            if (cacheRawJiraFiles) {
+                projectData = tryUpdateFromLocalJiraFiles(projectData, observer);
+            }
             if (!cacheOnly) {
                 projectData = updateCachedProject(projectData, observer);
             }
@@ -74,7 +82,7 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
     }
 
     private File[] getIssuesFiles(String projectId) {
-        return jiraCacheIssuesDirectory.listFiles((File dir1, String name) -> name.matches(projectId+"-\\d+\\.json"));
+        return jiraCacheIssuesDirectory.listFiles((File dir1, String name) -> name.matches(projectId + "-\\d+\\.json"));
 
     }
 
@@ -82,7 +90,7 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
         // TODO: the time zone should be taken from user configuration on jira side.
         ZoneId userJiraZoneId = ZoneId.systemDefault();
         String lastUpdatedQueryValue = projectData.getLastUpdatedIssue().withZoneSameInstant(userJiraZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        AgileProjectStatuses newStatuses = statusReader.getProjectStatuses("AAS", false);
+        AgileProjectStatuses newStatuses = statusReader.getProjectStatuses(projectData.getProjectId(), false);
         int maxResults = 50;
         int startAt = 0;
         int total = 0;
@@ -107,16 +115,19 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
             Iterator<JsonNode> issuesIterator = tree.get("issues").elements();
             while (issuesIterator.hasNext()) {
                 JsonNode node = issuesIterator.next();
-                IssueData issueData = issueParser.parseJiraIssue(node);
+                IssueData issueData = issueParser.parseJiraIssue(node, emptyDescriptionAndSummary);
                 if (issueData.getUpdated().isAfter(lastUpdatedIssue)) {
                     lastUpdatedIssue = issueData.getUpdated();
                 }
                 issues.put(issueData.getKey(), issueData);
-                try {
-                    fileStorage.storeFile(getIssueFile(issueData.getKey()), OBJECT_MAPPER.writeValueAsString(node));
-                } catch (IOException ex) {
-                    LOG.warn("Unable to store vanila jira issue data. Issue id: {}", issueData.getKey(), ex);
+                if (cacheRawJiraFiles) {
+                    try {
+                        fileStorage.storeFile(getIssueFile(issueData.getKey()), OBJECT_MAPPER.writeValueAsString(node));
+                    } catch (IOException ex) {
+                        LOG.warn("Unable to store vanila jira issue data. Issue id: {}", issueData.getKey(), ex);
+                    }
                 }
+
             };
             projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, lastUpdatedIssue, issues, customFieldsNames, newStatuses);
             startAt = startAt + maxResults;
@@ -146,7 +157,7 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
                 Map<String, IssueData> issues = new HashMap<>(projectData.getIssues());
                 for (File file : files) {
 
-                    IssueData issueData = issueParser.parseJiraIssue(OBJECT_MAPPER.readTree(fileStorage.loadFile(file)));
+                    IssueData issueData = issueParser.parseJiraIssue(OBJECT_MAPPER.readTree(fileStorage.loadFile(file)), emptyDescriptionAndSummary);
                     if (issueData.getUpdated().isAfter(lastUpdatedIssue)) {
                         lastUpdatedIssue = issueData.getUpdated();
                     }
