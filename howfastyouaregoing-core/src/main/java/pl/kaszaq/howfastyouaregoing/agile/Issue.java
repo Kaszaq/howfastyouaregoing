@@ -38,6 +38,10 @@ public class Issue {
         return issueDataWrapper.getDurationInStatuses(statuses);
     }
 
+    public boolean isStatusOnDay(LocalDate date, Set<String> statuses) {
+        return issueDataWrapper.isStatusOnDay(date, statuses);
+    }
+
     public Map<String, Duration> getTimeInStatus() {
         return issueDataWrapper.getTimeInStatus();
     }

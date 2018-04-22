@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
@@ -23,9 +25,37 @@ class IssueDataWrapper {
 
     @Getter(lazy = true)
     private final Set<LocalDate> allDayBlockedDays = calculateDatesWhenAllDayBlocked();
+    private final Map<String, SortedSet<LocalDate>> datesInStatus = new HashMap<>();
 
     public Duration getDurationInStatuses(String... statuses) {
         return Stream.of(statuses).map(status -> getTimeInStatus().getOrDefault(status, Duration.ZERO)).reduce(Duration::plus).get();
+    }
+
+    public boolean isStatusOnDay(LocalDate date, Set<String> statuses) {
+        return statuses.stream().anyMatch((status) -> (getDatesInStatus(status).contains(date)));
+    }
+
+    private SortedSet<LocalDate> getDatesInStatus(String status) {
+        return datesInStatus.computeIfAbsent(status, s -> calculateDatesInStatus(s));
+    }
+
+    private SortedSet<LocalDate> calculateDatesInStatus(String requiredStatus) {
+        TreeSet<LocalDate> datesInCurrentStatus = new TreeSet<>();
+        ZonedDateTime temp = null;
+        for (IssueStatusTransition issueStatusTransition : issue.getIssueStatusTransitions()) {
+            if (temp != null) {
+                datesInCurrentStatus.addAll(DateUtils.getCollectionOfLocalDates(temp, issueStatusTransition.getDate()));
+                temp = null;
+            }
+            if (requiredStatus.equals(issueStatusTransition.getToStatus())) {
+                temp = issueStatusTransition.getDate();
+            }
+        }
+        if (temp != null) {
+            datesInCurrentStatus.addAll(DateUtils.getCollectionOfLocalDates(temp, ZonedDateTime.now()));
+        }
+
+        return datesInCurrentStatus;
     }
 
     private Set<LocalDate> calculateDatesWhenAllDayBlocked() {
