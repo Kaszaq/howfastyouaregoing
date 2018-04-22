@@ -25,31 +25,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class StatusOrderCalculator {
 
     static List<String> getStatusOrder(Collection<Issue> issues) {
-        Map<Optional<String>, Map<String, Long>> recentTransitions = issues.stream()
-                .filter(IssuePredicates.updatedAfter(LocalDate.now().minusMonths(6).atStartOfDay(ZoneId.systemDefault())))
-                .flatMap(i -> i.getIssueStatusTransitions().stream())
-                .collect(Collectors.groupingBy(i -> Optional.ofNullable(i.getFromStatus()), Collectors.groupingBy(i -> i.getToStatus(), Collectors.counting())));
-        Map<Optional<String>, Map<String, Long>> transitions = issues.stream()
-                //.filter(IssuePredicates.createdAfter(LocalDate.now().minusMonths(6).atStartOfDay(ZoneId.systemDefault())))
-                .flatMap(i -> i.getIssueStatusTransitions().stream())
-                //.filter(i -> i.getFromStatus()!=null)
-                .collect(Collectors.groupingBy(i -> Optional.ofNullable(i.getFromStatus()), Collectors.groupingBy(i -> i.getToStatus(), Collectors.counting())));
-        System.out.println(transitions);
+        Map<Optional<String>, Map<String, Long>> recentTransitions = countRecentTransitions(issues);
+        Map<Optional<String>, Map<String, Long>> transitions = countAllTransitions(issues);
+        LOG.debug("Transitions {}", transitions);
 
-        Map<String, String> mapping;
-        if (recentTransitions.isEmpty()) {
-            mapping = calculateMapping(transitions);
-        } else {
-            mapping = calculateMapping(recentTransitions);
-        }
+        Map<String, String> mapping = calculateMapping(recentTransitions, transitions);
 
-        System.out.println(mapping);
+        LOG.debug("Mapping {}", mapping);
+
         String tempStatus = null;
-        LinkedList<String> statusOrder = new LinkedList<>();
+        LinkedList<String> statusOrder = new LinkedList<>(); //linkedhashset?
         do {
             tempStatus = mapping.get(tempStatus);
             if (tempStatus != null && !statusOrder.contains(tempStatus)) {
@@ -58,17 +49,18 @@ public class StatusOrderCalculator {
                 tempStatus = null;
             }
         } while (tempStatus != null);
-        while (statusOrder.size() < mapping.size()) {
-            for (Map.Entry<String, String> entry : mapping.entrySet()) {
-                if (!statusOrder.contains(entry.getKey()) && statusOrder.contains(entry.getValue())) {
-                    int pos = statusOrder.indexOf(entry.getValue());
-                    statusOrder.add(pos, entry.getKey());
-                }
-            }
-        }
 
-        List<String> statuses = transitions.values().stream().flatMap(map -> map.keySet().stream()).distinct().collect(toList());
-        for (String status : statuses) {
+//        while (statusOrder.size() < mapping.size() - 1) {
+//            for (Map.Entry<String, String> entry : mapping.entrySet()) {
+//                if (entry.getKey()!=null && !statusOrder.contains(entry.getKey()) && statusOrder.contains(entry.getValue())) {
+//                    int pos = statusOrder.indexOf(entry.getValue());
+//                    statusOrder.add(pos, entry.getKey());
+//                }
+//            }
+//        }
+
+        List<String> toStatuses = calculateAllToStatuses(transitions);
+        for (String status : toStatuses) {
             if (!statusOrder.contains(status)) {
                 String highestFrom = null;
                 long val = 0L;
@@ -79,11 +71,38 @@ public class StatusOrderCalculator {
                         highestFrom = entry.getKey().orElse(null);
                     }
                 }
-                statusOrder.add(statusOrder.indexOf(highestFrom) + 1, status);
+                final int order = statusOrder.indexOf(highestFrom) + 1;
+                statusOrder.add(order, status);
             }
         }
-        statusOrder.removeFirst();
         return statusOrder;
+    }
+
+    private static List<String> calculateAllToStatuses(Map<Optional<String>, Map<String, Long>> transitions) {
+        return transitions.values().stream().flatMap(map -> map.keySet().stream()).distinct().collect(toList());
+    }
+
+    private static Map<String, String> calculateMapping(Map<Optional<String>, Map<String, Long>> recentTransitions, Map<Optional<String>, Map<String, Long>> transitions) {
+        Map<String, String> mapping;
+        if (recentTransitions.isEmpty()) {
+            mapping = calculateMapping(transitions);
+        } else {
+            mapping = calculateMapping(recentTransitions);
+        }
+        return mapping;
+    }
+
+    private static Map<Optional<String>, Map<String, Long>> countAllTransitions(Collection<Issue> issues) {
+        return issues.stream()
+                .flatMap(i -> i.getIssueStatusTransitions().stream())
+                .collect(Collectors.groupingBy(i -> Optional.ofNullable(i.getFromStatus()), Collectors.groupingBy(i -> i.getToStatus(), Collectors.counting())));
+    }
+
+    private static Map<Optional<String>, Map<String, Long>> countRecentTransitions(Collection<Issue> issues) {
+        return issues.stream()
+                .filter(IssuePredicates.updatedAfter(LocalDate.now().minusMonths(6).atStartOfDay(ZoneId.systemDefault())))
+                .flatMap(i -> i.getIssueStatusTransitions().stream())
+                .collect(Collectors.groupingBy(i -> Optional.ofNullable(i.getFromStatus()), Collectors.groupingBy(i -> i.getToStatus(), Collectors.counting())));
     }
 
     private static Map<String, String> calculateMapping(Map<Optional<String>, Map<String, Long>> transitions) {
