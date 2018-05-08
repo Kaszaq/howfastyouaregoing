@@ -63,7 +63,10 @@ class IssueDataWrapper {
 
         ZonedDateTime temp = null;
         for (IssueBlockedTransition issueBlockedTransition : issue.getIssueBlockedTransitions()) {
-            if (!issueBlockedTransition.isBlocked()) {
+            if (!issueBlockedTransition.isBlocked() ) {
+                if(temp==null){
+                    System.out.println("zonk");
+                }
                 blockedDays.addAll(DateUtils.getCollectionOfLocalDatesBetweenDateExclusive(temp, issueBlockedTransition.getDate()));
                 temp = null;
             } else if (temp == null) {
