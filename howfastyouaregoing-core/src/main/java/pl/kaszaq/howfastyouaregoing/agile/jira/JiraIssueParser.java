@@ -179,6 +179,17 @@ class JiraIssueParser {
 
             });
         }
+        // TODO: either remove this transitions [prefered] or find out way to read initial status
+
+        if (!issueBlockedTransitions.isEmpty()) {
+            String initialStatus;
+            IssueBlockedTransition firstTransition = issueBlockedTransitions.first();
+            initialStatus = firstTransition.getFromStatus();
+            if (initialStatus != null) {
+                IssueBlockedTransition trans = new IssueBlockedTransition(creator, created, null, initialStatus);
+                issueBlockedTransitions.add(trans);
+            }
+        }
 
         return issueBlockedTransitions;
     }
