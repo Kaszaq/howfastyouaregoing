@@ -1,7 +1,7 @@
 package pl.kaszaq.howfastyouaregoing.agile;
 
-import com.google.common.collect.ImmutableList;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,7 +43,7 @@ public class AgileProject {
     }
 
     private List<String> calculateProbableStatusOrder() {
-        return ImmutableList.copyOf(StatusOrderCalculator.getStatusOrder(getAllIssues()));
+        return Collections.unmodifiableList(new ArrayList<>(StatusOrderCalculator.getStatusOrder(getAllIssues())));
     }
 
     private LocalDateTime calculateFirstIssueCreateDate() {

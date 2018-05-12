@@ -79,7 +79,7 @@ public class CachingAgileProjectProvider implements AgileProjectProvider {
 
             return Optional.of(new AgileProjectFactory().createAgileProject(projectData, configuration.getIssueStatusMapping()));
         } catch (Throwable ex) {
-            LOG.warn("Problem while reading project data of project {}" + projectId, ex);
+            LOG.warn("Problem while reading project data of project {}" , projectId, ex);
             return Optional.empty();
         }
     }

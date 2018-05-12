@@ -35,7 +35,7 @@ public class IssueBlockedTransition implements Comparable<IssueBlockedTransition
 
     @JsonIgnore
     public boolean isBlocked() {
-        return toStatus != null;
+        return toStatus != null && !toStatus.isEmpty(); //TODO: is this the right way to do it.. maybe remove this..
     }
 
     @Override
