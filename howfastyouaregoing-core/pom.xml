@@ -28,8 +28,8 @@
         <connection>scm:hg:ssh://hg@bitbucket.org/kaszaq/howfastyouaregoing</connection>
         <developerConnection>scm:hg:ssh://hg@bitbucket.org/kaszaq/howfastyouaregoing</developerConnection>
         <url>https://bitbucket.org/kaszaq/howfastyouaregoing</url>
-    <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -114,7 +114,7 @@
                 <configuration>
                     <serverId>ossrh</serverId>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
                 </configuration>
             </plugin>
         </plugins>
@@ -122,6 +122,10 @@
     <profiles>
         <profile> 
             <id>release</id>
+            <properties>
+                <gpg.keyname>${env.GPG_KEY}</gpg.keyname>
+                <gpg.passphrase>${env.GPG_PWD}</gpg.passphrase>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
