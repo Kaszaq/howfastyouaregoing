@@ -18,4 +18,4 @@ pipelines:
           - echo "username = $SCM_USERNAME" >> ~/.hgrc
           - cd howfastyouaregoing-core
           - mvn -B verify # -B batch mode makes Maven less verbose
-          - mvn -B release:prepare release:perform -DdryRun=true -Dusername=$SCM_USERNAME
+          - mvn -B -s ../settings.xml release:prepare release:perform -Dusername=$SCM_USERNAME -P release -DdryRun=true 
