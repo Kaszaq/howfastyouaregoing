@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pl.kaszaq.howfastyouaregoing</groupId>
     <artifactId>howfastyouaregoing-core</artifactId>
-    <version>0.3</version>
+    <version>0.4-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>HowFastYouAreGoing core</name>
     <description>Library that helps to work on agile data, for instance retrieved from Jira and caches it locally.</description>
@@ -28,7 +28,7 @@
         <connection>scm:hg:ssh://hg@bitbucket.org/kaszaq/howfastyouaregoing</connection>
         <developerConnection>scm:hg:ssh://hg@bitbucket.org/kaszaq/howfastyouaregoing</developerConnection>
         <url>https://bitbucket.org/kaszaq/howfastyouaregoing</url>
-        <tag>howfastyouaregoing-core-0.3</tag>
+        <tag>HEAD</tag>
     </scm>
     
     <properties>
