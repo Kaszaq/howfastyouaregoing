@@ -14,6 +14,8 @@ pipelines:
         script: # Modify the commands below to build your repository.
           - echo "$GPG_KEY" | base64 -d > gpg.key
           - gpg --import -a gpg.key
+          - echo "[ui]" >> ~/.hgrc
+          - echo "username = $SCM_USERNAME" >> ~/.hgrc
           - cd howfastyouaregoing-core
           - mvn -B verify # -B batch mode makes Maven less verbose
-          - mvn -B release:prepare release:perform -DdryRun=true
+          - mvn -B release:prepare release:perform -DdryRun=true -Dusername=$SCM_USERNAME
