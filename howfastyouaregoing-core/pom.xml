@@ -25,8 +25,8 @@
     </developers>
     
     <scm>
-        <connection>scm:hg:https://bitbucket.org/kaszaq/howfastyouaregoing</connection>
-        <developerConnection>scm:hg:https://bitbucket.org/kaszaq/howfastyouaregoing</developerConnection>
+        <connection>scm:hg:ssh://hg@bitbucket.org/kaszaq/howfastyouaregoing</connection>
+        <developerConnection>scm:hg:ssh://hg@bitbucket.org/kaszaq/howfastyouaregoing</developerConnection>
         <url>https://bitbucket.org/kaszaq/howfastyouaregoing</url>
   </scm>
     
