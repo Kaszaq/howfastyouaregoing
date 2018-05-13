@@ -31,8 +31,8 @@ AgileProjectProvider agileProjectProvider = JiraAgileProjectProviderBuilderFacto
 
 // configure client
 AgileClient agileClient = AgileClientFactory.newClient()
-        .withAgileProjectProvider(agileProjectProvider)
-        .create()
+                .withAgileProjectProvider(agileProjectProvider)
+                .create();
 
 // get set of all labels used in project MYAWESOMEPROJECT
 Set<String> labels = 
