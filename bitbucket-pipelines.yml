@@ -8,6 +8,7 @@ image: maven:3.3.9
 pipelines:
   default:
     - step:
+        trigger: manual
         caches:
           - maven
         script: # Modify the commands below to build your repository.
