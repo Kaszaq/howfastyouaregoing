@@ -12,5 +12,8 @@ pipelines:
         caches:
           - maven
         script: # Modify the commands below to build your repository.
+          - echo "$GPG_KEY" | base64 -d > gpg.key
+          - gpg --import -a gpg.key
           - cd howfastyouaregoing-core
           - mvn -B verify # -B batch mode makes Maven less verbose
+          - mvn -B release:prepare release:perform -DdryRun=true
