@@ -2,6 +2,10 @@
 
 # DEPLOYMENT
 
+## Releasing
+1. Trigger pipeline.
+2. Go to https://oss.sonatype.org/ to release from staging if everything is ok.
+
 ## Testing deployment locally
 Follow https://confluence.atlassian.com/bitbucket/debug-your-pipelines-locally-with-docker-838273569.html
 

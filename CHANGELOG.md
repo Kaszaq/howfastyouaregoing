@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 0.5
+* fixed issue when most recent status tranition trainsitioned to status that was renamed / replaced
+* changed fixing of tranitions that are to statuses that are no longer used - now the time of this tranition is taken from the trantion where last currently used status was used.
+
 ### Current (xx-xx-xx)
 * added example for throughput per type
 * added autocloseable to HttpClient
