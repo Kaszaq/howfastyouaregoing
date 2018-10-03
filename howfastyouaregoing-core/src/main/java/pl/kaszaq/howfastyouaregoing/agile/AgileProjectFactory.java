@@ -1,5 +1,6 @@
 package pl.kaszaq.howfastyouaregoing.agile;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -71,10 +72,14 @@ public class AgileProjectFactory {
         String previousStatus = null;
         boolean added = true;
         String newFromStatus = null;
+        ZonedDateTime date = null;
+        String user = null;
         for (IssueStatusTransition issueStatusTransition : v.getIssueStatusTransitions()) {
             if (added) {
                 newFromStatus = statusMapping.mapStatus(issueStatusTransition.getFromStatus());
                 newFromStatus = fixStatusFlowContinuityIfBroken(previousStatus, newFromStatus);
+                date = issueStatusTransition.getDate();
+                user = issueStatusTransition.getUser();
                 added = false;
             }
             String newToStatus = statusMapping.mapStatus(issueStatusTransition.getToStatus());
@@ -83,12 +88,20 @@ public class AgileProjectFactory {
                 previousStatus = newToStatus;
                 IssueStatusTransition newStatusTransition
                         = new IssueStatusTransition(
-                                issueStatusTransition.getUser(),
-                                issueStatusTransition.getDate(),
+                                user,
+                                date,
                                 newFromStatus,
                                 newToStatus);
                 newStatusTransitionSet.add(newStatusTransition);
             }
+        }
+        
+        if (!added) {
+            newStatusTransitionSet.add(new IssueStatusTransition(
+                    user,
+                    date,
+                    newFromStatus,
+                    statusMapping.mapStatus(v.getStatus())));
         }
         return newStatusTransitionSet;
     }

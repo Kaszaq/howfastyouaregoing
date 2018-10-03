@@ -14,7 +14,7 @@ Library is available in [![Maven Central](https://maven-badges.herokuapp.com/mav
 <dependency>
     <groupId>pl.kaszaq.howfastyouaregoing</groupId>
     <artifactId>howfastyouaregoing-core</artifactId>
-    <version>0.2</version>
+    <version>...</version>
 </dependency>
 ```
 
