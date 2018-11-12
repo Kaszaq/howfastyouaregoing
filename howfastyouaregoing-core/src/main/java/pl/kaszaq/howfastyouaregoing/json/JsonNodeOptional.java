@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public class JsonNodeOptional {
-
+    // TODO: this probably can be replaced by "path(*)" methods..
     private final Optional<JsonNode> optionalNode;
 
     private JsonNodeOptional(JsonNode node) {
