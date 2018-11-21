@@ -1,5 +1,6 @@
 package pl.kaszaq.howfastyouaregoing.examples;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import pl.kaszaq.howfastyouaregoing.agile.AgileClient;
@@ -43,7 +44,7 @@ public class CustomFieldsExample {
     private static double getAverageSize(final String projectId) {
         final AgileProject agileProject = agileClient.getAgileProject(projectId);
         return agileProject.getAllIssues().stream()
-                .mapToInt(issue -> (Integer) issue.getCustomFields().get("estimatedIssueSize"))
+                .mapToInt(issue -> issue.get("estimatedIssueSize", new TypeReference<Integer>(){}))
                 .average()
                 .getAsDouble();
     }

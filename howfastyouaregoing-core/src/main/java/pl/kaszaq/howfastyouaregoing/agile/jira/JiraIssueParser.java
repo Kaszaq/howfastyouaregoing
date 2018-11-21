@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import pl.kaszaq.howfastyouaregoing.agile.IssueData;
 import pl.kaszaq.howfastyouaregoing.agile.IssueBlockedTransition;
 import pl.kaszaq.howfastyouaregoing.agile.IssueStatusTransition;
-import pl.kaszaq.howfastyouaregoing.json.JsonNodeOptional;
 import static pl.kaszaq.howfastyouaregoing.Config.OBJECT_MAPPER;
 import static pl.kaszaq.howfastyouaregoing.utils.DateUtils.parseDate;
 
@@ -22,24 +21,23 @@ import static pl.kaszaq.howfastyouaregoing.utils.DateUtils.parseDate;
 @AllArgsConstructor
 class JiraIssueParser {
 
-    private final Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers;
+    private final Map<String, Function<JsonNode, Object>> customFieldsParsers;
 
     IssueData parseJiraIssue(String jsonIssue, boolean emptyDescriptionAndSummary) throws IOException {
         JsonNode node = OBJECT_MAPPER.readTree(jsonIssue);
         return parseJiraIssue(node, emptyDescriptionAndSummary);
     }
 
-    IssueData parseJiraIssue(JsonNode node, boolean emptyDescriptionAndSummary) {
-        JsonNodeOptional issueNode = JsonNodeOptional.of(node);
+    IssueData parseJiraIssue(JsonNode issueNode, boolean emptyDescriptionAndSummary) {
 
-        String key = issueNode.get("key").asText();
+        String key = issueNode.path("key").asText(null);
         LOG.debug("Parsing issue {}", key);
 
-        JsonNodeOptional fieldsNode = issueNode.get("fields");
-        String creator = fieldsNode.get("creator").get("name").asText();
-        ZonedDateTime created = parseDate(fieldsNode.get("created").asText());
-        ZonedDateTime updated = parseDate(fieldsNode.get("updated").asText());
-        String status = fieldsNode.get("status").get("name").asText();
+        JsonNode fieldsNode = issueNode.path("fields");
+        String creator = fieldsNode.path("creator").path("name").asText(null);
+        ZonedDateTime created = parseDate(fieldsNode.path("created").asText(null));
+        ZonedDateTime updated = parseDate(fieldsNode.path("updated").asText(null));
+        String status = fieldsNode.path("status").path("name").asText(null);
 
         String summary;
         String description;
@@ -47,24 +45,24 @@ class JiraIssueParser {
             summary = "";
             description = "";
         } else {
-            summary = fieldsNode.get("summary").asText();
-            description = fieldsNode.get("description").asText();
+            summary = fieldsNode.path("summary").asText(null);
+            description = fieldsNode.path("description").asText(null);
         }
         TreeSet<IssueStatusTransition> issueStatusTransitions = getIssueStatusTransitions(issueNode, status, creator, created);
         TreeSet<IssueBlockedTransition> issueBlockedTransitions = getIssueBlockedTransitions(issueNode, status, creator, created);
 
-        JsonNodeOptional issueTypeNode = fieldsNode.get("issuetype");
-        boolean subtask = issueTypeNode.get("subtask").asBoolean();
-        String type = issueTypeNode.get("name").asText();
+        JsonNode issueTypeNode = fieldsNode.path("issuetype");
+        boolean subtask = issueTypeNode.path("subtask").asBoolean(false);
+        String type = issueTypeNode.path("name").asText(null);
 
         List<String> linkedIssuesKeys = getLinkedIssuesKeys(fieldsNode);
         List<String> subtasksKeys = getSubtasksKeys(fieldsNode);
-        String parentKey = fieldsNode.get("parent").get("key").asText();
-        String resolution = fieldsNode.get("resolution").get("name").asText();
+        String parentKey = fieldsNode.path("parent").path("key").asText(null);
+        String resolution = fieldsNode.path("resolution").path("name").asText(null);
         List<String> labels = new ArrayList<>();
-        fieldsNode.get("labels").elements().forEachRemaining(labelNode -> labels.add(labelNode.asText()));
+        fieldsNode.path("labels").elements().forEachRemaining(labelNode -> labels.add(labelNode.asText(null)));
         List<String> components = new ArrayList<>();
-        fieldsNode.get("components").elements().forEachRemaining(componentNode -> components.add(componentNode.get("name").asText()));
+        fieldsNode.path("components").elements().forEachRemaining(componentNode -> components.add(componentNode.path("name").asText(null)));
         // TODO: this filed should not be a part of issue but rather additional, in some custom fields map.
         Map<String, Object> customFields = new HashMap<>();
         customFieldsParsers.forEach((k, v) -> {
@@ -97,10 +95,10 @@ class JiraIssueParser {
         return issue;
     }
 
-    private List<String> getSubtasksKeys(JsonNodeOptional fieldsNode) {
+    private List<String> getSubtasksKeys(JsonNode fieldsNode) {
         List<String> subtasksKeys = new ArrayList<>();
-        fieldsNode.get("subtasks").elements().forEachRemaining(subtaskNode -> {
-            String key = subtaskNode.get("key").asText();
+        fieldsNode.path("subtasks").elements().forEachRemaining(subtaskNode -> {
+            String key = subtaskNode.path("key").asText(null);
             if (key != null) {
                 subtasksKeys.add(key);
             }
@@ -108,16 +106,16 @@ class JiraIssueParser {
         return subtasksKeys;
     }
 
-    private List<String> getLinkedIssuesKeys(JsonNodeOptional fieldsNode) {
+    private List<String> getLinkedIssuesKeys(JsonNode fieldsNode) {
         List<String> linkedIssuesKeys = new ArrayList<>();
-        fieldsNode.get("issuelinks").elements().forEachRemaining(issueLinkNode -> {
+        fieldsNode.path("issuelinks").elements().forEachRemaining(issueLinkNode -> {
             if (issueLinkNode.has("outwardIssue")) {
-                String key = issueLinkNode.get("outwardIssue").get("key").asText();
+                String key = issueLinkNode.path("outwardIssue").path("key").asText(null);
                 if (key != null) { // TODO these checks (if key !=null) were added just because obfuscated data has null, it should not be possible with normal data. Wort considering either modifying example data or decdigint whether this is ok.
                     linkedIssuesKeys.add(key);
                 }
             } else {
-                String key = issueLinkNode.get("inwardIssue").get("key").asText();
+                String key = issueLinkNode.path("inwardIssue").path("key").asText(null);
                 if (key != null) {
                     linkedIssuesKeys.add(key);
                 }
@@ -126,19 +124,19 @@ class JiraIssueParser {
         return linkedIssuesKeys;
     }
 
-    private TreeSet<IssueStatusTransition> getIssueStatusTransitions(JsonNodeOptional issueNode, String status, String creator, ZonedDateTime created) {
+    private TreeSet<IssueStatusTransition> getIssueStatusTransitions(JsonNode issueNode, String status, String creator, ZonedDateTime created) {
         TreeSet<IssueStatusTransition> issueStatusTransitions = new TreeSet<>();
-        JsonNodeOptional changelogNode = issueNode.get("changelog");
-        int totalChangelogEntries = changelogNode.get("total").asInt();
+        JsonNode changelogNode = issueNode.path("changelog");
+        int totalChangelogEntries = changelogNode.path("total").asInt(0);
         if (totalChangelogEntries > 0) {
-            changelogNode.get("histories").elements().forEachRemaining(changelogEntry -> {
-                String username = changelogEntry.get("author").get("name").asText();
-                ZonedDateTime createdDate = parseDate(changelogEntry.get("created").asText());
+            changelogNode.path("histories").elements().forEachRemaining(changelogEntry -> {
+                String username = changelogEntry.path("author").path("name").asText(null);
+                ZonedDateTime createdDate = parseDate(changelogEntry.path("created").asText(null));
                 //LOG.debug("Parsed date of issue transition to {}", createdDate);
-                changelogEntry.get("items").elements().forEachRemaining(changelogItem -> {
-                    if ("status".equals(changelogItem.get("field").asText())) {
-                        String fromStatus = changelogItem.get("fromString").asText();
-                        String toStatus = changelogItem.get("toString").asText();
+                changelogEntry.path("items").elements().forEachRemaining(changelogItem -> {
+                    if ("status".equals(changelogItem.path("field").asText(null))) {
+                        String fromStatus = changelogItem.path("fromString").asText(null);
+                        String toStatus = changelogItem.path("toString").asText(null);
                         IssueStatusTransition issueStatusTransition = new IssueStatusTransition(username, createdDate, fromStatus, toStatus);
                         issueStatusTransitions.add(issueStatusTransition);
                     }
@@ -160,18 +158,18 @@ class JiraIssueParser {
         return issueStatusTransitions;
     }
 
-    private TreeSet<IssueBlockedTransition> getIssueBlockedTransitions(JsonNodeOptional issueNode, String status, String creator, ZonedDateTime created) {
+    private TreeSet<IssueBlockedTransition> getIssueBlockedTransitions(JsonNode issueNode, String status, String creator, ZonedDateTime created) {
         TreeSet<IssueBlockedTransition> issueBlockedTransitions = new TreeSet<>();
-        JsonNodeOptional changelogNode = issueNode.get("changelog");
-        int totalChangelogEntries = changelogNode.get("total").asInt();
+        JsonNode changelogNode = issueNode.path("changelog");
+        int totalChangelogEntries = changelogNode.path("total").asInt(0);
         if (totalChangelogEntries > 0) {
-            changelogNode.get("histories").elements().forEachRemaining(changelogEntry -> {
-                String username = changelogEntry.get("author").get("name").asText();
-                ZonedDateTime createdDate = parseDate(changelogEntry.get("created").asText());
-                changelogEntry.get("items").elements().forEachRemaining(changelogItem -> {
-                    if ("Flagged".equals(changelogItem.get("field").asText())) {
-                        String fromStatus = changelogItem.get("fromString").asText();
-                        String toStatus = changelogItem.get("toString").asText();
+            changelogNode.path("histories").elements().forEachRemaining(changelogEntry -> {
+                String username = changelogEntry.path("author").path("name").asText(null);
+                ZonedDateTime createdDate = parseDate(changelogEntry.path("created").asText(null));
+                changelogEntry.path("items").elements().forEachRemaining(changelogItem -> {
+                    if ("Flagged".equals(changelogItem.path("field").asText(null))) {
+                        String fromStatus = changelogItem.path("fromString").asText(null);
+                        String toStatus = changelogItem.path("toString").asText(null);
                         IssueBlockedTransition issueStatusTransition = new IssueBlockedTransition(username, createdDate, fromStatus, toStatus);
                         issueBlockedTransitions.add(issueStatusTransition);
                     }

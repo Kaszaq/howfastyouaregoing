@@ -1,5 +1,6 @@
 package pl.kaszaq.howfastyouaregoing.agile.jira;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import pl.kaszaq.howfastyouaregoing.agile.AgileProjectProvider;
 import java.io.File;
 import java.util.Collections;
@@ -8,7 +9,6 @@ import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import pl.kaszaq.howfastyouaregoing.agile.CachingAgileProjectProvider;
 import pl.kaszaq.howfastyouaregoing.http.HttpClient;
-import pl.kaszaq.howfastyouaregoing.json.JsonNodeOptional;
 import pl.kaszaq.howfastyouaregoing.storage.DefaultFileStorage;
 import pl.kaszaq.howfastyouaregoing.storage.FileStorage;
 
@@ -32,7 +32,7 @@ public class JiraAgileProjectProviderBuilderFactory {
         private File cacheDir;
         private String jiraUrl;
         private int minutesUntilUpdate = 15;
-        private Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers = Collections.emptyMap();
+        private Map<String, Function<JsonNode, Object>> customFieldsParsers = Collections.emptyMap();
         private boolean cacheOnly;
         private boolean emptyDescriptionAndSummary = false;
         private boolean cacheRawJiraFiles = true;
@@ -75,7 +75,7 @@ public class JiraAgileProjectProviderBuilderFactory {
         }
 
         public JiraAgileProjectProviderBuilder withCustomFieldsParsers(
-                Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers) {
+                Map<String, Function<JsonNode, Object>> customFieldsParsers) {
             this.customFieldsParsers = customFieldsParsers;
             return this;
         }
