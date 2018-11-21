@@ -15,6 +15,7 @@
  */
 package pl.kaszaq.howfastyouaregoing.agile.jira;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -23,7 +24,6 @@ import java.util.Set;
 import static pl.kaszaq.howfastyouaregoing.Config.OBJECT_MAPPER;
 import pl.kaszaq.howfastyouaregoing.agile.pojo.AgileProjectStatuses;
 import pl.kaszaq.howfastyouaregoing.http.HttpClient;
-import pl.kaszaq.howfastyouaregoing.json.JsonNodeOptional;
 import pl.kaszaq.howfastyouaregoing.storage.FileStorage;
 
 public class JiraProjectStatusReader {
@@ -65,15 +65,15 @@ public class JiraProjectStatusReader {
         Set<String> doneStatuses = new HashSet<>();
         Set<String> undefinedStatuses = new HashSet<>();
 
-        JsonNodeOptional tree = JsonNodeOptional.of(OBJECT_MAPPER.readTree(response));
-        Iterator<JsonNodeOptional> it = tree.elements();
+        JsonNode tree = OBJECT_MAPPER.readTree(response);
+        Iterator<JsonNode> it = tree.elements();
         while (it.hasNext()) {
-            JsonNodeOptional val = it.next();
-            Iterator<JsonNodeOptional> it2 = val.get("statuses").elements();
+            JsonNode val = it.next();
+            Iterator<JsonNode> it2 = val.path("statuses").elements();
             while (it2.hasNext()) {
-                JsonNodeOptional val2 = it2.next();
-                String name = val2.get("name").asText();
-                String category = val2.get("statusCategory").get("key").asText();
+                JsonNode val2 = it2.next();
+                String name = val2.path("name").asText(null);
+                String category = val2.path("statusCategory").path("key").asText(null);
                 if ("new".equals(category)) {
                     newStatuses.add(name);
                 }

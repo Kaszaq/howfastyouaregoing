@@ -1,4 +1,8 @@
 # CHANGELOG
+### ??
+- removed JsonNodeOptional -> should JsonNode with `path()` method be used instead of `get()` from JsonNodeOptional for accessing custom fields
+- reading all issue data now so those who would want could easily access comments or anything else like this
+- changed custom fields. Now it is required to provide TypeReference (instead of casting) as a parametr to `get()` method that is available directly on issue - it is no longer possible to acces custom field via getCustomFields(). This also allows to retrive Object and store for later where in the past only simple object were working correctly. However this might now work a bit slower.
 
 ### 0.5
 * fixed issue when most recent status tranition trainsitioned to status that was renamed / replaced

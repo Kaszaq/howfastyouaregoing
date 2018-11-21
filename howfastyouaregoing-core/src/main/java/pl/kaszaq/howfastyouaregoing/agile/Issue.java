@@ -15,6 +15,7 @@
  */
 package pl.kaszaq.howfastyouaregoing.agile;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -23,6 +24,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import pl.kaszaq.howfastyouaregoing.Config;
+import static pl.kaszaq.howfastyouaregoing.Config.OBJECT_MAPPER;
 
 public class Issue {
 
@@ -122,8 +125,15 @@ public class Issue {
         return issueData.getIssueBlockedTransitions();
     }
 
-    public Map<String, Object> getCustomFields() {
-        return issueData.getCustomFields();
+    /**
+     * Getter for custom fields defined
+     * @param customFieldName - name of defined custome field name to read
+     * @param typeReference - type reference of value of given custom field, for instance new TypeReference<List<Integer>>()
+     * @return
+     */
+    public <T> T get(String customFieldName, TypeReference<?> typeReference) {
+        // TODO: this, if impacts performance, could be cached
+        return OBJECT_MAPPER.convertValue(issueData.getCustomFields().get(customFieldName), typeReference);
     }
 
     @Override

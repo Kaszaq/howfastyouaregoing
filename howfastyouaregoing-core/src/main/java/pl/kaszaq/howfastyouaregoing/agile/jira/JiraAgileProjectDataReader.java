@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import static pl.kaszaq.howfastyouaregoing.Config.OBJECT_MAPPER;
 import pl.kaszaq.howfastyouaregoing.agile.pojo.AgileProjectData;
 import pl.kaszaq.howfastyouaregoing.http.HttpClient;
-import pl.kaszaq.howfastyouaregoing.json.JsonNodeOptional;
 import pl.kaszaq.howfastyouaregoing.agile.AgileProjectDataObserver;
 import pl.kaszaq.howfastyouaregoing.agile.pojo.AgileProjectStatuses;
 import pl.kaszaq.howfastyouaregoing.agile.IssueData;
@@ -41,7 +40,7 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
             HttpClient client,
             File jiraCacheIssuesDirectory,
             String jiraUrl,
-            Map<String, Function<JsonNodeOptional, Object>> customFieldsParsers,
+            Map<String, Function<JsonNode, Object>> customFieldsParsers,
             int minutesUntilUpdate,
             FileStorage fileStorage,
             boolean emptyDescriptionAndSummary,
@@ -83,7 +82,6 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
 
     private File[] getIssuesFiles(String projectId) {
         return jiraCacheIssuesDirectory.listFiles((File dir1, String name) -> name.matches(projectId + "-\\d+\\.json"));
-
     }
 
     private AgileProjectData updateCachedProject(AgileProjectData projectData, AgileProjectDataObserver observer) throws IOException {
@@ -101,6 +99,7 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
                     .expand(ImmutableSet.of("changelog"))
                     .jql("project = " + projectData.getProjectId() + " AND updated >= \"" + lastUpdatedQueryValue + "\" ORDER BY updated ASC")
                     .maxResults(maxResults)
+                    .fields(ImmutableSet.of("*all"))
                     .startAt(startAt)
                     .build();
 
