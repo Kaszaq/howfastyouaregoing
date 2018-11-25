@@ -13,6 +13,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import static pl.kaszaq.howfastyouaregoing.clock.HFYAGClock.getClock;
 import pl.kaszaq.howfastyouaregoing.utils.DateUtils;
 
 @AllArgsConstructor
@@ -52,7 +53,7 @@ class IssueDataWrapper {
             }
         }
         if (temp != null) {
-            datesInCurrentStatus.addAll(DateUtils.getCollectionOfLocalDates(temp, ZonedDateTime.now()));
+            datesInCurrentStatus.addAll(DateUtils.getCollectionOfLocalDates(temp, ZonedDateTime.now(getClock())));
         }
 
         return datesInCurrentStatus;
@@ -74,8 +75,8 @@ class IssueDataWrapper {
             }
         }
         if (temp != null) {
-            blockedDays.addAll(DateUtils.getCollectionOfLocalDatesBetweenDateExclusive(temp, ZonedDateTime.now()));
-            blockedDays.add(LocalDate.now());
+            blockedDays.addAll(DateUtils.getCollectionOfLocalDatesBetweenDateExclusive(temp, ZonedDateTime.now(getClock())));
+            blockedDays.add(LocalDate.now(getClock()));
         }
 
         return blockedDays;
@@ -98,7 +99,7 @@ class IssueDataWrapper {
             }
         }
         if (temp != null) {
-            duration = duration.plus(durationFunction.apply(temp, ZonedDateTime.now()));
+            duration = duration.plus(durationFunction.apply(temp, ZonedDateTime.now(getClock())));
         }
         return duration;
     }
