@@ -24,10 +24,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import org.apache.commons.lang3.ObjectUtils;
 import pl.kaszaq.howfastyouaregoing.Config;
 import static pl.kaszaq.howfastyouaregoing.Config.OBJECT_MAPPER;
 
-public class Issue {
+public class Issue implements Comparable<Issue> {
 
     private final IssueData issueData;
     private final IssueDataWrapper issueDataWrapper;
@@ -127,8 +128,10 @@ public class Issue {
 
     /**
      * Getter for custom fields defined
+     *
      * @param customFieldName - name of defined custome field name to read
-     * @param typeReference - type reference of value of given custom field, for instance new TypeReference<List<Integer>>()
+     * @param typeReference - type reference of value of given custom field, for
+     * instance new TypeReference<List<Integer>>()
      * @return
      */
     public <T> T get(String customFieldName, TypeReference<?> typeReference) {
@@ -161,6 +164,15 @@ public class Issue {
         }
         final Issue other = (Issue) obj;
         return Objects.equals(this.issueData, other.issueData);
+    }
+
+    @Override
+    public int compareTo(Issue o) {
+        final int result = this.getUpdated().compareTo(o.getUpdated());
+        if (result == 0) {
+            return this.getKey().compareTo(o.getKey());
+        }
+        return result;
     }
 
 }

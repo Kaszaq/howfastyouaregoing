@@ -20,6 +20,7 @@ import pl.kaszaq.howfastyouaregoing.http.HttpClient;
 import pl.kaszaq.howfastyouaregoing.agile.AgileProjectDataObserver;
 import pl.kaszaq.howfastyouaregoing.agile.pojo.AgileProjectStatuses;
 import pl.kaszaq.howfastyouaregoing.agile.IssueData;
+import static pl.kaszaq.howfastyouaregoing.clock.HFYAGClock.getClock;
 import pl.kaszaq.howfastyouaregoing.storage.FileStorage;
 
 @Slf4j
@@ -73,7 +74,7 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
     }
 
     private boolean requiresUpdate(AgileProjectData project) {
-        return project.getLastUpdated().isBefore(ZonedDateTime.now().minusMinutes(minutesUntilUpdate));
+        return project.getLastUpdated().isBefore(ZonedDateTime.now(getClock()).minusMinutes(minutesUntilUpdate));
     }
 
     private File getIssueFile(String issueId) {
@@ -134,7 +135,7 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
                 observer.updated(projectData, (double) startAt / (double) total);
             }
         } while (startAt < total);
-        projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, ZonedDateTime.now(), new HashMap<>(projectData.getIssues()), customFieldsNames, newStatuses);
+        projectData = new AgileProjectData(projectData.getProjectId(), lastUpdatedIssue, ZonedDateTime.now(getClock()), new HashMap<>(projectData.getIssues()), customFieldsNames, newStatuses);
         return projectData;
     }
 

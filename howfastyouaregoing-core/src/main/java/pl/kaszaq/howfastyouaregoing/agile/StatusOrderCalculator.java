@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 import lombok.extern.slf4j.Slf4j;
+import static pl.kaszaq.howfastyouaregoing.clock.HFYAGClock.getClock;
 
 @Slf4j
 public class StatusOrderCalculator {
@@ -100,7 +101,7 @@ public class StatusOrderCalculator {
 
     private static Map<Optional<String>, Map<String, Long>> countRecentTransitions(Collection<Issue> issues) {
         return issues.stream()
-                .filter(IssuePredicates.updatedAfter(LocalDate.now().minusMonths(6).atStartOfDay(ZoneId.systemDefault())))
+                .filter(IssuePredicates.updatedAfter(LocalDate.now(getClock()).minusMonths(6).atStartOfDay(ZoneId.systemDefault())))
                 .flatMap(i -> i.getIssueStatusTransitions().stream())
                 .collect(Collectors.groupingBy(i -> Optional.ofNullable(i.getFromStatus()), Collectors.groupingBy(i -> i.getToStatus(), Collectors.counting())));
     }
