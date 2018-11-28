@@ -22,7 +22,7 @@ import pl.kaszaq.howfastyouaregoing.workload.WorkloadReportFactory;
  * Tasks are grouped according to hierarchy hence in the end are grouped under
  * one top hierarchy item (project)
  */
-public class WhatWeWorkOnExample {
+public class WhatWeWorkOnTest {
 
     @Test
     public void sampleWhatWeWorkOnTest() {

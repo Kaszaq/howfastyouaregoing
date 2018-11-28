@@ -16,7 +16,7 @@ import org.junit.Test;
 import pl.kaszaq.howfastyouaregoing.agile.IssueStatusTransitionPredicates;
 import static pl.kaszaq.howfastyouaregoing.agile.IssueStatusTransitionPredicates.betweenStatuses;
 
-public class WipExample {
+public class WipTest {
 
     @Test
     public void sampleWipTest() {

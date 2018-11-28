@@ -22,7 +22,7 @@ import pl.kaszaq.howfastyouaregoing.workload.WorkloadReportFactory;
  *
  * @author michal.kasza
  */
-public class WorkloadExample {
+public class WorkloadTest {
 
     @Test
     public void sampleWorkloadFeatureTest() {
