@@ -1,5 +1,10 @@
 # CHANGELOG
 
+- removed examples project as examples were moved to tests of core project
+- !SUBSTRACTED one day when loading data from Jira. This is to avoid zone problems and should be resolved in future by actually reading zone which given user has setup in Jira. This is required for jql queries to work as expected and actually pull updated issues.
+- added test for updating project
+- added tests. These are basically moved examples to main project - hence they servethe purpose of examples as well and are not formatted in a test correct way ;).
+
 ### 0.6
 - removed JsonNodeOptional -> should JsonNode with `path()` method be used instead of `get()` from JsonNodeOptional for accessing custom fields
 - reading all issue data now so those who would want could easily access comments or anything else like this
