@@ -24,8 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import org.apache.commons.lang3.ObjectUtils;
-import pl.kaszaq.howfastyouaregoing.Config;
 import static pl.kaszaq.howfastyouaregoing.Config.OBJECT_MAPPER;
 
 public class Issue implements Comparable<Issue> {
@@ -135,7 +133,7 @@ public class Issue implements Comparable<Issue> {
      * @return
      */
     public <T> T get(String customFieldName, TypeReference<?> typeReference) {
-        // TODO: this, if impacts performance, could be cached
+        // TODO: this conversion, if impacts performance, could be cached
         return OBJECT_MAPPER.convertValue(issueData.getCustomFields().get(customFieldName), typeReference);
     }
 
