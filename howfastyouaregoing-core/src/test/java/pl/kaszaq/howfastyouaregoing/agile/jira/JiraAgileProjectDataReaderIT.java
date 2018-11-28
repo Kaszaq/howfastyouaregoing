@@ -59,6 +59,7 @@ public class JiraAgileProjectDataReaderIT {
     public TemporaryFolder folder = new TemporaryFolder();
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(options().dynamicPort().usingFilesUnderClasspath("AWW_wiremock_mappings"));
+    private File cacheDirectory;
 
 
     public JiraAgileProjectDataReaderIT() {
@@ -77,6 +78,7 @@ public class JiraAgileProjectDataReaderIT {
 
     @Before
     public void setUp() throws IOException {
+         cacheDirectory = folder.newFolder("cache");
 
         
     }
@@ -86,9 +88,9 @@ public class JiraAgileProjectDataReaderIT {
     public void shouldReadProjectFromExternal_whenNotLoadedBefore() throws Exception {
         // given
         AgileProjectProvider agileProjectProvider = JiraAgileProjectProviderBuilderFactory
-                .withJsession("cookievalue")
+                .withCredentials("jira", "jira")
                 .withCacheOnly(false)
-                .withCacheDir(folder.newFolder("cache"))
+                .withCacheDir(cacheDirectory)
                 .withJiraUrl("http://localhost:" + wireMockRule.port() + "/")
                 .build();
 
@@ -103,7 +105,27 @@ public class JiraAgileProjectDataReaderIT {
         JsonNode result = OBJECT_MAPPER.valueToTree(issues);
         JsonNode expected = OBJECT_MAPPER.readTree(new File("src/test/resources/AWW_issues_sorted.json"));
         assertThatJson(result).isEqualTo(expected);
-     
+    }
+    
+        @Test
+    public void shouldReadProjectFromFileAndExternal_whenLoadedBefore() throws Exception {
+        // given
+        FileUtils.copyDirectory(new File("src/test/resources/AWW_data_before_update"), cacheDirectory);
+        AgileProjectProvider agileProjectProvider = JiraAgileProjectProviderBuilderFactory
+                .withCredentials("jira", "jira")
+                .withCacheOnly(false)
+                .withCacheDir(cacheDirectory)
+                .withJiraUrl("http://localhost:" + wireMockRule.port() + "/")
+                .withMinutesUntilUpdate(0)
+                .build();
+
+         AgileClient agileClient = AgileClientFactory.newClient()
+                .withAgileProjectProvider(agileProjectProvider)
+                .create();
+        // when
+        AgileProject project = agileClient.getAgileProject("AWW");
+        assertThat(project.getIssue("AWW-10")).isNotNull().extracting(Issue::getSummary).isEqualTo("Updated issue");
+        assertThat(project.getIssue("AWW-136")).isNotNull().extracting(Issue::getSummary).isEqualTo("New issue");
     }
 
 

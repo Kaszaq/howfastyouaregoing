@@ -86,9 +86,13 @@ public class JiraAgileProjectDataReader implements AgileProjectDataReader {
     }
 
     private AgileProjectData updateCachedProject(AgileProjectData projectData, AgileProjectDataObserver observer) throws IOException {
-        // TODO: the time zone should be taken from user configuration on jira side.
+        // TODO: the time zone should be taken from user configuration on jira side. Currently one day is substracted to avoid any issues
         ZoneId userJiraZoneId = ZoneId.systemDefault();
-        String lastUpdatedQueryValue = projectData.getLastUpdatedIssue().withZoneSameInstant(userJiraZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        String lastUpdatedQueryValue = projectData.getLastUpdatedIssue()
+                .minusDays(1)
+                .withZoneSameInstant(userJiraZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        
+
         AgileProjectStatuses newStatuses = statusReader.getProjectStatuses(projectData.getProjectId(), false);
         int maxResults = 50;
         int startAt = 0;
