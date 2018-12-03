@@ -1,12 +1,12 @@
 package pl.kaszaq.howfastyouaregoing.agile;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import pl.kaszaq.howfastyouaregoing.agile.pojo.AgileProjectData;
 
@@ -62,12 +62,12 @@ public class AgileProjectFactory {
         return newAllStatuses;
     }
 
-    private TreeSet<IssueStatusTransition> remapStatusTransitions(IssueData v, IssueStatusMapping statusMapping, Set<String> newAllStatuses) {
+    private List<IssueStatusTransition> remapStatusTransitions(IssueData v, IssueStatusMapping statusMapping, Set<String> newAllStatuses) {
         if (statusMapping == null) {
             return v.getIssueStatusTransitions();
         }
 
-        TreeSet<IssueStatusTransition> newStatusTransitionSet = new TreeSet<>();
+        List<IssueStatusTransition> newStatusTransitionSet = new ArrayList<>();
 
         String previousStatus = null;
         boolean added = true;

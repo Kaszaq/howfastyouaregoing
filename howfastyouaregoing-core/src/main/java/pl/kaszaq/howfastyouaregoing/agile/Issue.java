@@ -116,11 +116,11 @@ public class Issue implements Comparable<Issue> {
         return issueData.getComponents();
     }
 
-    public TreeSet<IssueStatusTransition> getIssueStatusTransitions() {
+    public List<IssueStatusTransition> getIssueStatusTransitions() {
         return issueData.getIssueStatusTransitions();
     }
 
-    public TreeSet<IssueBlockedTransition> getIssueBlockedTransitions() {
+    public List<IssueBlockedTransition> getIssueBlockedTransitions() {
         return issueData.getIssueBlockedTransitions();
     }
 
