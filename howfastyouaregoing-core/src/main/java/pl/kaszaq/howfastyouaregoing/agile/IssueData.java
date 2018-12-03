@@ -31,8 +31,8 @@ public class IssueData {
     private final List<String> linkedIssuesKeys;
     private final List<String> labels;
     private final List<String> components;
-    private final TreeSet<IssueStatusTransition> issueStatusTransitions;
-    private final TreeSet<IssueBlockedTransition> issueBlockedTransitions;
+    private final List<IssueStatusTransition> issueStatusTransitions;
+    private final List<IssueBlockedTransition> issueBlockedTransitions;
     private final Map<String, Object> customFields;
 
     @JsonIgnore

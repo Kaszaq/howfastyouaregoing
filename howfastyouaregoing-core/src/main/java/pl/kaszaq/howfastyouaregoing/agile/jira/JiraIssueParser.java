@@ -48,8 +48,8 @@ class JiraIssueParser {
             summary = fieldsNode.path("summary").asText(null);
             description = fieldsNode.path("description").asText(null);
         }
-        TreeSet<IssueStatusTransition> issueStatusTransitions = getIssueStatusTransitions(issueNode, status, creator, created);
-        TreeSet<IssueBlockedTransition> issueBlockedTransitions = getIssueBlockedTransitions(issueNode, status, creator, created);
+        List<IssueStatusTransition> issueStatusTransitions = getIssueStatusTransitions(issueNode, status, creator, created);
+        List<IssueBlockedTransition> issueBlockedTransitions = getIssueBlockedTransitions(issueNode, status, creator, created);
 
         JsonNode issueTypeNode = fieldsNode.path("issuetype");
         boolean subtask = issueTypeNode.path("subtask").asBoolean(false);
@@ -124,8 +124,8 @@ class JiraIssueParser {
         return linkedIssuesKeys;
     }
 
-    private TreeSet<IssueStatusTransition> getIssueStatusTransitions(JsonNode issueNode, String status, String creator, ZonedDateTime created) {
-        TreeSet<IssueStatusTransition> issueStatusTransitions = new TreeSet<>();
+    private List<IssueStatusTransition> getIssueStatusTransitions(JsonNode issueNode, String status, String creator, ZonedDateTime created) {
+        List<IssueStatusTransition> issueStatusTransitions = new ArrayList<>();
         JsonNode changelogNode = issueNode.path("changelog");
         int totalChangelogEntries = changelogNode.path("total").asInt(0);
         if (totalChangelogEntries > 0) {
@@ -147,7 +147,7 @@ class JiraIssueParser {
 
         String initialStatus;
         if (!issueStatusTransitions.isEmpty()) {
-            IssueStatusTransition firstTransition = issueStatusTransitions.first();
+            IssueStatusTransition firstTransition = issueStatusTransitions.get(0);
             initialStatus = firstTransition.getFromStatus();
 
         } else {
@@ -158,8 +158,8 @@ class JiraIssueParser {
         return issueStatusTransitions;
     }
 
-    private TreeSet<IssueBlockedTransition> getIssueBlockedTransitions(JsonNode issueNode, String status, String creator, ZonedDateTime created) {
-        TreeSet<IssueBlockedTransition> issueBlockedTransitions = new TreeSet<>();
+    private List<IssueBlockedTransition> getIssueBlockedTransitions(JsonNode issueNode, String status, String creator, ZonedDateTime created) {
+        List<IssueBlockedTransition> issueBlockedTransitions = new ArrayList<>();
         JsonNode changelogNode = issueNode.path("changelog");
         int totalChangelogEntries = changelogNode.path("total").asInt(0);
         if (totalChangelogEntries > 0) {
@@ -181,7 +181,7 @@ class JiraIssueParser {
 
         if (!issueBlockedTransitions.isEmpty()) {
             String initialStatus;
-            IssueBlockedTransition firstTransition = issueBlockedTransitions.first();
+            IssueBlockedTransition firstTransition = issueBlockedTransitions.get(0);
             initialStatus = firstTransition.getFromStatus();
             if (initialStatus != null) {
                 IssueBlockedTransition trans = new IssueBlockedTransition(creator, created, null, initialStatus);
