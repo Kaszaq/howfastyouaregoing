@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +47,7 @@ class JiraIssueParser {
             summary = fieldsNode.path("summary").asText(null);
             description = fieldsNode.path("description").asText(null);
         }
+
         List<IssueStatusTransition> issueStatusTransitions = getIssueStatusTransitions(issueNode, status, creator, created);
         List<IssueBlockedTransition> issueBlockedTransitions = getIssueBlockedTransitions(issueNode, status, creator, created);
 
@@ -127,6 +127,7 @@ class JiraIssueParser {
     private List<IssueStatusTransition> getIssueStatusTransitions(JsonNode issueNode, String status, String creator, ZonedDateTime created) {
         List<IssueStatusTransition> issueStatusTransitions = new ArrayList<>();
         JsonNode changelogNode = issueNode.path("changelog");
+
         int totalChangelogEntries = changelogNode.path("total").asInt(0);
         if (totalChangelogEntries > 0) {
             changelogNode.path("histories").elements().forEachRemaining(changelogEntry -> {
@@ -144,17 +145,6 @@ class JiraIssueParser {
 
             });
         }
-
-        String initialStatus;
-        if (!issueStatusTransitions.isEmpty()) {
-            IssueStatusTransition firstTransition = issueStatusTransitions.get(0);
-            initialStatus = firstTransition.getFromStatus();
-
-        } else {
-            initialStatus = status;
-        }
-        IssueStatusTransition issueStatusTransition = new IssueStatusTransition(creator, created, null, initialStatus);
-        issueStatusTransitions.add(issueStatusTransition);
         return issueStatusTransitions;
     }
 
