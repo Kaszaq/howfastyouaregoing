@@ -63,9 +63,17 @@ public class AgileProjectFactory {
     }
 
     private List<IssueStatusTransition> remapStatusTransitions(IssueData v, IssueStatusMapping statusMapping, Set<String> newAllStatuses) {
-        if (statusMapping == null) {
-            return v.getIssueStatusTransitions();
+        String initialStatus;
+        List<IssueStatusTransition> issueStatusTransitions = new ArrayList<>(v.getIssueStatusTransitions());
+        if (!issueStatusTransitions.isEmpty()) {
+            IssueStatusTransition firstTransition = issueStatusTransitions.get(0);
+            initialStatus = firstTransition.getFromStatus();
+
+        } else {
+            initialStatus = v.getStatus();
         }
+
+        issueStatusTransitions.add(0, new IssueStatusTransition(v.getCreator(), v.getCreated(), null, initialStatus));
 
         List<IssueStatusTransition> newStatusTransitionSet = new ArrayList<>();
 
@@ -74,7 +82,7 @@ public class AgileProjectFactory {
         String newFromStatus = null;
         ZonedDateTime date = null;
         String user = null;
-        for (IssueStatusTransition issueStatusTransition : v.getIssueStatusTransitions()) {
+        for (IssueStatusTransition issueStatusTransition : issueStatusTransitions) {
             if (added) {
                 newFromStatus = statusMapping.mapStatus(issueStatusTransition.getFromStatus());
                 newFromStatus = fixStatusFlowContinuityIfBroken(previousStatus, newFromStatus);
@@ -95,7 +103,7 @@ public class AgileProjectFactory {
                 newStatusTransitionSet.add(newStatusTransition);
             }
         }
-        
+
         if (!added) {
             newStatusTransitionSet.add(new IssueStatusTransition(
                     user,
@@ -103,7 +111,8 @@ public class AgileProjectFactory {
                     newFromStatus,
                     statusMapping.mapStatus(v.getStatus())));
         }
-        return newStatusTransitionSet;
+
+        return new ArrayList<>(newStatusTransitionSet);
     }
 
     private String fixStatusFlowContinuityIfBroken(String previousStatus, String newFromStatus) {
