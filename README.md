@@ -5,7 +5,7 @@ This is a library that helps analyze data from JIRA. Once connected to JIRA, it 
 1. Caching JIRA data locally
 2. Easy to get any data regarding your project instantly
 3. Some classes to help calculate data like `CFD`, `cycle time` etc. .
-4. [Examples](howfastyouaregoing-core/src/test/java/pl/kaszaq/howfastyouaregoing/agile/jira/examples/) with sample data.
+4. [Examples](src/test/java/pl/kaszaq/howfastyouaregoing/agile/jira/examples/) with sample data.
 
 ### Binaries
 Library is available in [![Maven Central](https://maven-badges.herokuapp.com/maven-central/pl.kaszaq.howfastyouaregoing/howfastyouaregoing-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/pl.kaszaq.howfastyouaregoing/howfastyouaregoing-core)
@@ -76,7 +76,7 @@ throughput, wait time, flow efficiency etc. or anything else you would like to k
 
 ### Examples
 
-Some [Examples](howfastyouaregoing-core/src/test/java/pl/kaszaq/howfastyouaregoing/agile/jira/examples/) are available
+Some [Examples](src/test/java/pl/kaszaq/howfastyouaregoing/agile/jira/examples/) are available
 but these still lack proper explanation. 
 
 ### Code quality is...
