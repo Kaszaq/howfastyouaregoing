@@ -7,7 +7,7 @@
     <packaging>jar</packaging>
     <name>HowFastYouAreGoing core</name>
     <description>Library that helps to work on agile data, for instance retrieved from Jira and caches it locally.</description>
-    <url>https://bitbucket.org/kaszaq/howfastyouaregoing</url>
+    <url>https://github.com/Kaszaq/howfastyouaregoing</url>
     
     <licenses>
         <license>
@@ -20,16 +20,9 @@
         <developer>
             <name>Michał Kasza</name>
             <email>kaszaq@gmail.com</email>
-            <organizationUrl>https://bitbucket.org/kaszaq/</organizationUrl>
+            <organizationUrl>https://github.com/Kaszaq</organizationUrl>
         </developer>
     </developers>
-    
-    <scm>
-        <connection>scm:hg:ssh://hg@bitbucket.org/kaszaq/howfastyouaregoing</connection>
-        <developerConnection>scm:hg:ssh://hg@bitbucket.org/kaszaq/howfastyouaregoing</developerConnection>
-        <url>https://bitbucket.org/kaszaq/howfastyouaregoing</url>
-        <tag>HEAD</tag>
-    </scm>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

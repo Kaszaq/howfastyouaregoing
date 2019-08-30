@@ -1,9 +1,0 @@
-syntax: glob
-target/
-nbproject/
-nb-configuration.xml
-dependency-reduced-pom.xml
-nbactions.xml
-.idea/
-howfastyouaregoing-examples/src/main/resources/cache/*
-howfastyouaregoing-core/howfastyouaregoing-core.iml
