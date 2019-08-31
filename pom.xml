@@ -15,7 +15,11 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
-    
+    <scm>
+        <connection>scm:git:git@github.com:Kaszaq/howfastyouaregoing</connection>
+        <developerConnection>scm:git:git@github.com:Kaszaq/howfastyouaregoing.git</developerConnection>
+        <url>https://github.com/Kaszaq/howfastyouaregoing/</url>
+    </scm>
     <developers>
         <developer>
             <name>Michał Kasza</name>
@@ -128,12 +132,7 @@
             <scope>test</scope>
         </dependency>
         
-        <dependency>
-            <groupId>tw.com.shihyu</groupId>
-            <artifactId>memory-measurer</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
+
         <dependency>
             <groupId>com.mitchtalmadge</groupId>
             <artifactId>ascii-data</artifactId>
@@ -142,6 +141,19 @@
         </dependency>
         
     </dependencies>
+    <profiles>
+        <profile>
+            <id>memoryTest</id>
+            <dependencies>
+                <dependency>
+                    <groupId>tw.com.shihyu</groupId>
+                    <artifactId>memory-measurer</artifactId>
+                    <version>0.0.1-SNAPSHOT</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
     <build>
         <plugins>
             <plugin>

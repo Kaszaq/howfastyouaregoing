@@ -25,8 +25,8 @@ public class MemoryMeasure {
 
         AgileProject project = agileClient.getAgileProject("AWW");
 
-        System.out.println(MemoryMeasurer.measureBytes(project));
-        System.out.println(ObjectGraphMeasurer.measure(project));
+//        System.out.println(MemoryMeasurer.measureBytes(project));
+//        System.out.println(ObjectGraphMeasurer.measure(project));
 
     }
 }
