@@ -97,6 +97,12 @@ If you think you can contribute something please create an issue with descriptio
 
 I'd really love to hear your feedback - if you can please give me one using [issue tracker](https://bitbucket.org/kaszaq/howfastyouaregoing/issues)
 
+### Special thanks
+
+Huge thanks for support from JetBrains by providing their great tools for free to work on this project.
+
+[<img src="https://raw.githubusercontent.com/Kaszaq/howfastyouaregoing/master/documentation/jetbrains.png" alt="JetBrains logo"  width="150px">](https://www.jetbrains.com/?from=howfastyouaregoing)
+
 ### License
 Copyright 2017 Michał Kasza
 
